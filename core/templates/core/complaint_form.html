@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% block title %}{% if editing %}Edit{% else %}Add{% endif %} Complaint | Newline CMS{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item">Complaint</li><li class="breadcrumb-item active">{% if editing %}Edit{% else %}Add{% endif %}</li>{% endblock %}
+
+{% block content %}
+<a href="{% url 'complaint_list' %}" class="btn btn-primary mb-3"><i class="fas fa-arrow-left mr-1"></i>Back</a>
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{% if editing %}Edit Complaint — {{ editing.ticket_no }}{% else %}Add Complaint{% endif %}</span>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 form-group">
+          <label>Product <span class="text-required">*</span></label>
+          {{ form.product }}
+          {% for e in form.product.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Region <span class="text-required">*</span></label>
+          {{ form.region }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Customer Name <span class="text-required">*</span></label>
+          {{ form.customer_name }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Customer Mobile <span class="text-required">*</span></label>
+          {{ form.customer_mobile }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>SPOC</label>
+          {{ form.spoc }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Distributor / Partner</label>
+          {{ form.distributor_partner }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Distributor Mobile</label>
+          {{ form.distributor_mobile }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Registration Date <span class="text-required">*</span></label>
+          {{ form.registration_date }}
+        </div>
+        <div class="col-md-6 form-group">
+          <label>Status</label>
+          {{ form.status }}
+          <small class="text-muted">Set to Resolved/Closed to auto-stamp the closed date.</small>
+        </div>
+        <div class="col-md-12 form-group">
+          <label>Description</label>
+          {{ form.description }}
+        </div>
+      </div>
+      <div class="text-right"><button type="submit" class="btn btn-primary px-4">Submit</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

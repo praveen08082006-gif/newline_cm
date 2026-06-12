@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% block title %}User List | Newline CMS{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">User List</li>{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="get" class="form-row align-items-end">
+      <div class="col-md-4 mb-2">
+        <label>Region</label>
+        <select name="region" class="custom-select">
+          <option value="All">All</option>
+          {% for r in regions %}<option value="{{ r }}" {% if request.GET.region == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 mb-2">
+        <label>User Type</label>
+        <select name="user_type" class="custom-select">
+          <option value="">Select User Type</option>
+          {% for t in user_types %}<option value="{{ t }}" {% if request.GET.user_type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 mb-2">
+        <button type="submit" class="btn btn-primary px-4">Filter</button>
+        <a href="{% url 'employee_list' %}" class="btn btn-outline-secondary px-4">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="card-title">User List</span>
+    <a href="{% url 'employee_add' %}" class="btn btn-gold btn-sm"><i class="fas fa-plus mr-1"></i>Add User</a>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered table-hover dt-export">
+      <thead>
+        <tr><th>S.No</th><th>Employee Name</th><th>Type</th><th>Region</th><th>Email</th><th>Mobile</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ row }}</td>
+          <td>{{ row.user_type }}</td>
+          <td>{{ row.region|default:"-" }}</td>
+          <td>{{ row.user.email }}</td>
+          <td>{{ row.contact_no|default:"-" }}</td>
+          <td>{% if row.is_active %}<span class="status-pill status-resolved">Active</span>{% else %}<span class="status-pill status-closed">Inactive</span>{% endif %}</td>
+          <td>
+            <a href="{% url 'employee_delete' row.id %}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Remove this user?')"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted">No users yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

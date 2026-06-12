@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment (never commit this — the server builds its own)
+venv/
+env/
+.venv/
+
+# Local editor / Claude settings
+.claude/
+*.local.json
+
+# Collected static files (regenerated on the server)
+staticfiles/
+
+# Secrets
+.env
+
+# OS junk
+Thumbs.db
+.DS_Store

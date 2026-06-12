@@ -1,0 +1,2 @@
+Django==6.0.6
+django-adminlte3==0.1.6

@@ -1,0 +1,282 @@
+/* =====================================================================
+   Newline CMS — "Royale" premium enterprise theme (over AdminLTE 3)
+   Luxury high-end SaaS look. Functionality untouched; visuals only.
+   ===================================================================== */
+
+:root {
+  --navy:        #0F1B3C;  /* deep royal navy — sidebar / dark surfaces */
+  --navy-soft:   #16264f;  /* lighter navy for gradients */
+  --royal:       #1E4FA3;  /* rich royal blue — primary accent / buttons */
+  --royal-dark:  #173d7e;  /* button hover */
+  --brand-blue:  #1565C0;  /* newline brand blue — highlights */
+  --gold:        #C9A84C;  /* champagne gold — sparing premium touches */
+  --gold-soft:   #e3cf94;
+  --cream:       #FAF8F3;  /* card background */
+  --charcoal:    #1A1A2E;  /* body text */
+  --page-bg:     #EEF1F6;  /* page background */
+  --muted:       #74809a;
+  --line:        #e3e8f1;
+  --radius:      12px;
+  --t:           .2s ease; /* standard micro-transition */
+}
+
+/* ---------- Base typography ---------- */
+body,
+.content-wrapper {
+  background: var(--page-bg) !important;
+  color: var(--charcoal);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4, h5, h6,
+.content-header h1,
+.card-title,
+.section-title,
+.small-box h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: .2px;
+}
+
+.content-header h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+label, .btn, .badge, .nav-link p, .status-pill, .badge-days,
+.breadcrumb, th, .dataTables_info, .page-link {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ---------- Sidebar ---------- */
+.main-sidebar,
+.sidebar-dark-navy {
+  background: linear-gradient(190deg, var(--navy) 0%, #0a132c 100%) !important;
+}
+
+.brand-link {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(201, 168, 76, .28) !important; /* thin gold divider */
+  padding: 22px 12px !important;
+  text-align: center;
+}
+.brand-link .nl-logo { width: 84%; max-width: 200px; height: auto; display: block; margin: 0 auto; }
+
+.sidebar .nav-sidebar > .nav-item { margin: 2px 0; }
+.sidebar .nav-sidebar > .nav-item > .nav-link {
+  color: #c3cee6 !important;
+  border-radius: 10px;
+  margin: 3px 12px;
+  padding: 11px 14px;
+  font-weight: 500;
+  transition: background var(--t), color var(--t), box-shadow var(--t);
+}
+.sidebar .nav-sidebar > .nav-item > .nav-link:hover {
+  background: rgba(30, 79, 163, .22) !important;
+  color: #fff !important;
+}
+/* active: royal blue with a gold left indicator */
+.sidebar .nav-sidebar .nav-link.active {
+  background: var(--royal) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(15, 27, 60, .45);
+  position: relative;
+}
+.sidebar .nav-sidebar .nav-link.active::before {
+  content: "";
+  position: absolute; left: -12px; top: 9px; bottom: 9px;
+  width: 4px; border-radius: 0 4px 4px 0;
+  background: linear-gradient(var(--gold-soft), var(--gold));
+}
+.nav-treeview .nav-link {
+  color: #97a6c8 !important;
+  border-radius: 8px;
+  margin: 2px 10px 2px 20px;
+  padding: 8px 14px;
+  transition: background var(--t), color var(--t);
+}
+.nav-treeview .nav-link:hover { color:#fff !important; background: rgba(255,255,255,.06)!important; }
+.nav-treeview .nav-link.active { color:#fff !important; background: rgba(30,79,163,.5) !important; }
+.nav-icon { color: var(--gold); opacity: .9; }
+.nav-link.active .nav-icon { color: #fff; opacity: 1; }
+
+/* ---------- Top navbar ---------- */
+.main-header.navbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--line) !important;
+  box-shadow: 0 2px 14px rgba(15, 27, 60, .05);
+}
+.navbar .badge-info { background: var(--royal); font-weight: 600; }
+
+/* ---------- Cards ---------- */
+.card {
+  border: none;
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: 0 12px 32px rgba(15, 27, 60, .08);
+  overflow: hidden;
+  margin-bottom: 26px;
+}
+.card-header {
+  background: linear-gradient(95deg, var(--navy), var(--navy-soft)) !important;
+  color: #fff !important;
+  border: none;
+  padding: 18px 24px;
+}
+.card-header .card-title { font-size: 1.15rem; font-weight: 700; margin: 0; color: #fff; }
+.card-body { padding: 24px; }
+
+/* KPI small-box — thin gold top accent */
+.small-box.bg-white {
+  background: var(--cream) !important;
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(15, 27, 60, .08);
+  border-top: 2px solid var(--gold);
+}
+.small-box .inner { padding: 16px 20px; }
+.small-box h3 { font-weight: 700; font-size: 2.3rem; }
+.small-box p { font-family: 'Poppins', sans-serif; font-weight: 500; color: var(--muted); }
+.small-box .icon > i { font-size: 58px; opacity: .18; }
+
+/* section title with thin gold underline */
+.section-title {
+  font-weight: 700; color: var(--navy);
+  display: inline-block; padding-bottom: 8px; margin-bottom: 20px;
+  border-bottom: 2px solid var(--gold);
+}
+
+/* ---------- Buttons ---------- */
+.btn { border-radius: 10px; font-weight: 600; transition: all var(--t); }
+.btn-primary, .btn-navy, .bg-navy.btn {
+  background: var(--royal); border: none; color:#fff;
+  box-shadow: 0 6px 16px rgba(30, 79, 163, .25);
+}
+.btn-primary:hover, .btn-navy:hover {
+  background: var(--royal-dark); transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(30, 79, 163, .32);
+}
+.btn-gold {
+  background: linear-gradient(95deg, var(--gold), var(--gold-soft));
+  color: #4a3712; border: none; font-weight: 700;
+  box-shadow: 0 6px 16px rgba(201, 168, 76, .3);
+}
+.btn-gold:hover { filter: brightness(1.05); transform: translateY(-1px); color:#3a2c0e; }
+.btn-outline-secondary { border-radius: 10px; }
+.btn-outline-primary { color: var(--royal); border-color: var(--royal); }
+.btn-outline-primary:hover { background: var(--royal); }
+.btn-sm { border-radius: 8px; }
+
+/* ---------- Forms ---------- */
+.form-control, .custom-select {
+  border-radius: 10px;
+  border: 1px solid #d6deeb;
+  padding: 11px 15px;
+  height: auto;
+  color: var(--charcoal);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.form-control:focus, .custom-select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 .2rem rgba(201, 168, 76, .22); /* gold focus glow */
+}
+label { font-weight: 600; color: #3a455c; margin-bottom: 6px; }
+.text-required { color: #d64545; }
+.form-group { margin-bottom: 20px; }
+
+/* ---------- Tables ---------- */
+.table { color: var(--charcoal); }
+.table thead th {
+  background: linear-gradient(95deg, var(--navy), var(--navy-soft));
+  color: #fff; border: none !important;
+  font-weight: 600; font-size: .82rem; letter-spacing: .4px; text-transform: uppercase;
+  padding: 14px 16px; vertical-align: middle;
+}
+.table td { vertical-align: middle; padding: 14px 16px; border-color: var(--line); }
+.table tbody tr { transition: background var(--t); }
+.table tbody tr:nth-child(even) { background: #f5f7fb; }      /* soft alternating rows */
+.table tbody tr:hover { background: #e9effaff; }
+.table-bordered, .table-bordered td, .table-bordered th { border-color: var(--line); }
+
+/* ---------- Day-open badges (resolution metric) ---------- */
+.badge-days { font-size: .8rem; padding: .42em .75em; border-radius: 8px; font-weight: 700; display:inline-block; }
+.badge-days.success { background: #e4f7ec; color: #1c8146; }
+.badge-days.warning { background: #fff3d6; color: #9a6a05; }
+.badge-days.danger  { background: #fde6e6; color: #c0392b; }
+
+/* status pills */
+.status-pill { border-radius: 20px; padding: .38em .95em; font-weight: 600; font-size: .78rem; display:inline-block; }
+.status-open        { background:#e8f0fc; color:var(--royal); }
+.status-inprogress  { background:#fff3d6; color:#9a6a05; }
+.status-caselocked  { background:#e7ecf5; color:#3a455c; }
+.status-resolved    { background:#e4f7ec; color:#1c8146; }
+.status-closed      { background:#eceff4; color:var(--muted); }
+
+/* ---------- DataTables controls ---------- */
+.dt-buttons .btn { margin-right: 6px; }
+table.dataTable thead .sorting::after,
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::after { color: var(--gold-soft); }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--royal) !important; border-color: var(--royal) !important; color:#fff !important;
+  border-radius: 8px;
+}
+.dataTables_filter input { border-radius: 8px; border: 1px solid #d6deeb; padding: 6px 10px; }
+
+/* ---------- Breadcrumb / footer ---------- */
+.breadcrumb { background: transparent; margin: 0; font-weight: 500; }
+.breadcrumb-item a { color: var(--royal); }
+.breadcrumb-item.active { color: var(--muted); }
+.main-footer {
+  background: #fff; border-top: 1px solid var(--line);
+  color: var(--muted); font-family: 'Poppins', sans-serif; font-size: .82rem;
+}
+
+/* alerts */
+.alert { border-radius: 10px; border: none; }
+.alert-success { background:#e4f7ec; color:#1c8146; }
+.alert-danger  { background:#fde6e6; color:#c0392b; }
+
+/* =====================================================================
+   LOGIN PAGE — elegant, minimal, royale
+   ===================================================================== */
+body.login-page {
+  background: linear-gradient(180deg, var(--navy) 0%, #0a132c 100%) !important;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
+.royale-login { width: 410px; max-width: 92vw; }
+.royale-login .brand { text-align: center; margin-bottom: 30px; }
+.royale-login .brand .nl-logo { width: 240px; max-width: 78%; height: auto; }
+.royale-login .card {
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .4);
+  border: none;
+}
+.royale-login .login-card-body { padding: 38px 34px; }
+.royale-login .login-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 1.6rem; color: var(--navy);
+  text-align: center; margin-bottom: 4px;
+}
+.royale-login .login-box-msg {
+  color: var(--muted); font-size: .9rem; padding-top: 0; margin-bottom: 26px;
+}
+.royale-login .input-group { margin-bottom: 18px; }
+.royale-login .input-group-text {
+  background: #f4f7fc; color: var(--royal);
+  border: 1px solid #d6deeb; border-left: none; border-radius: 0 10px 10px 0;
+}
+.royale-login .form-control { border-right: none; }
+.royale-login .form-control:focus { box-shadow: none; border-color: var(--gold); }
+.royale-login .form-control:focus + .input-group-append .input-group-text { border-color: var(--gold); }
+.royale-login .btn-signin {
+  background: var(--royal); border: none; color:#fff;
+  font-weight: 600; border-radius: 10px; padding: 13px;
+  letter-spacing: .3px; transition: all var(--t);
+  box-shadow: 0 10px 24px rgba(30, 79, 163, .35);
+}
+.royale-login .btn-signin:hover { background: var(--royal-dark); transform: translateY(-1px); }
+.royale-login .login-footnote { color: rgba(255,255,255,.45); text-align:center; margin-top:22px; font-size:.78rem; letter-spacing:.3px; }

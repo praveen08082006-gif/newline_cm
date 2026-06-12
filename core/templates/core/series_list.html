@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block title %}Series List | Newline CMS{% endblock %}
+{% block page_title %}{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Series List</li>{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="card-title">Series List</span>
+    <a href="{% url 'series_add' %}" class="btn btn-gold btn-sm"><i class="fas fa-plus mr-1"></i>Add Series</a>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered table-hover dt-export">
+      <thead><tr><th style="width:90px">S.No</th><th>Series Name</th><th style="width:120px">Action</th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ row.name }}</td>
+          <td>
+            <a href="{% url 'series_delete' row.id %}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Delete this series?')"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center text-muted">No series yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
