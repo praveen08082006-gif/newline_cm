@@ -70,6 +70,17 @@ def series_add(request):
 
 
 @login_required
+def series_edit(request, pk):
+    obj = get_object_or_404(Series, pk=pk)
+    form = SeriesForm(request.POST or None, instance=obj)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Series updated successfully.')
+        return redirect('series_list')
+    return render(request, 'core/series_form.html', {'form': form, 'active_menu': 'series', 'editing': obj})
+
+
+@login_required
 def series_list(request):
     return render(request, 'core/series_list.html',
                   {'rows': Series.objects.all(), 'active_menu': 'series'})
@@ -94,6 +105,17 @@ def product_add(request):
 
 
 @login_required
+def product_edit(request, pk):
+    obj = get_object_or_404(Product, pk=pk)
+    form = ProductForm(request.POST or None, instance=obj)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Product updated successfully.')
+        return redirect('product_list')
+    return render(request, 'core/product_form.html', {'form': form, 'active_menu': 'product', 'editing': obj})
+
+
+@login_required
 def product_list(request):
     return render(request, 'core/product_list.html',
                   {'rows': Product.objects.select_related('series').all(), 'active_menu': 'product'})
@@ -115,6 +137,17 @@ def role_add(request):
         messages.success(request, 'Role added successfully.')
         return redirect('role_list')
     return render(request, 'core/role_form.html', {'form': form, 'active_menu': 'user_roles'})
+
+
+@login_required
+def role_edit(request, pk):
+    obj = get_object_or_404(UserRole, pk=pk)
+    form = UserRoleForm(request.POST or None, instance=obj)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Role updated successfully.')
+        return redirect('role_list')
+    return render(request, 'core/role_form.html', {'form': form, 'active_menu': 'user_roles', 'editing': obj})
 
 
 @login_required
@@ -154,6 +187,26 @@ def employee_add(request):
         messages.success(request, f'Employee "{name}" added. Temp password: Newline@123')
         return redirect('employee_list')
     return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users'})
+
+
+@login_required
+def employee_edit(request, pk):
+    emp = get_object_or_404(Employee, pk=pk)
+    initial = {'employee_name': emp.user.get_full_name() or emp.user.username,
+               'email': emp.user.email}
+    form = EmployeeForm(request.POST or None, instance=emp, initial=initial)
+    if form.is_valid():
+        emp = form.save()
+        # keep the linked login user's name + email in sync
+        name = form.cleaned_data['employee_name']
+        parts = name.split(' ', 1)
+        emp.user.first_name = parts[0]
+        emp.user.last_name = parts[1] if len(parts) > 1 else ''
+        emp.user.email = form.cleaned_data['email']
+        emp.user.save()
+        messages.success(request, f'Employee "{name}" updated.')
+        return redirect('employee_list')
+    return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users', 'editing': emp})
 
 
 @login_required
@@ -254,6 +307,17 @@ def faq_add(request):
         messages.success(request, 'FAQ added successfully.')
         return redirect('faq_list')
     return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq'})
+
+
+@login_required
+def faq_edit(request, pk):
+    obj = get_object_or_404(FAQ, pk=pk)
+    form = FAQForm(request.POST or None, instance=obj)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'FAQ updated successfully.')
+        return redirect('faq_list')
+    return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq', 'editing': obj})
 
 
 @login_required

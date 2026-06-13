@@ -18,21 +18,25 @@ urlpatterns = [
     # Users / Employees
     path('employee/add/', core_views.employee_add, name='employee_add'),
     path('employee/', core_views.employee_list, name='employee_list'),
+    path('employee/<int:pk>/edit/', core_views.employee_edit, name='employee_edit'),
     path('employee/<int:pk>/delete/', core_views.employee_delete, name='employee_delete'),
 
     # User Roles
     path('role/add/', core_views.role_add, name='role_add'),
     path('role/', core_views.role_list, name='role_list'),
+    path('role/<int:pk>/edit/', core_views.role_edit, name='role_edit'),
     path('role/<int:pk>/delete/', core_views.role_delete, name='role_delete'),
 
     # Series
     path('series/add/', core_views.series_add, name='series_add'),
     path('series/', core_views.series_list, name='series_list'),
+    path('series/<int:pk>/edit/', core_views.series_edit, name='series_edit'),
     path('series/<int:pk>/delete/', core_views.series_delete, name='series_delete'),
 
     # Product
     path('product/add/', core_views.product_add, name='product_add'),
     path('product/', core_views.product_list, name='product_list'),
+    path('product/<int:pk>/edit/', core_views.product_edit, name='product_edit'),
     path('product/<int:pk>/delete/', core_views.product_delete, name='product_delete'),
 
     # Complaint
@@ -44,6 +48,7 @@ urlpatterns = [
     # FAQ
     path('faq/add/', core_views.faq_add, name='faq_add'),
     path('faq/', core_views.faq_list, name='faq_list'),
+    path('faq/<int:pk>/edit/', core_views.faq_edit, name='faq_edit'),
     path('faq/<int:pk>/delete/', core_views.faq_delete, name='faq_delete'),
 
     # Reports

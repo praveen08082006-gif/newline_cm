@@ -16,7 +16,8 @@
         <tr>
           <td>{{ forloop.counter }}</td>
           <td>{{ row.name }}</td>
-          <td>
+          <td style="white-space:nowrap">
+            <a href="{% url 'role_edit' row.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
             <a href="{% url 'role_delete' row.id %}" class="btn btn-sm btn-outline-danger"
                onclick="return confirm('Delete this role?')"><i class="fas fa-trash"></i></a>
           </td>
