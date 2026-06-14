@@ -1,10 +1,13 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% block title %}Dashboard | Newline Complaint Management{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block page_title %}{% endblock %}
 {% block breadcrumb %}<li class="breadcrumb-item active">Dashboard</li>{% endblock %}
 
 {% block content %}
+
+<!-- Brand banner -->
+<div class="brand-banner">{% include 'core/_logo.html' %}</div>
 
 <!-- Stat cards -->
 <div class="stat-grid">
@@ -50,18 +53,18 @@
   </div>
 </div>
 
-<!-- Compact charts -->
+<!-- Charts -->
 <div class="row">
   <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Product Wise Report</span></div>
-      <div class="card-body"><canvas id="productChart" height="210"></canvas></div>
+    <div class="card h-100">
+      <div class="card-header"><span class="card-title">Region Wise Report</span></div>
+      <div class="card-body"><canvas id="regionChart" height="240"></canvas></div>
     </div>
   </div>
   <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Region Wise Report</span></div>
-      <div class="card-body"><canvas id="regionChart" height="210"></canvas></div>
+    <div class="card h-100">
+      <div class="card-header"><span class="card-title">Product Wise Report</span></div>
+      <div class="card-body"><canvas id="productChart" height="240"></canvas></div>
     </div>
   </div>
 </div>
@@ -108,51 +111,64 @@
 <script>
 Chart.register(ChartDataLabels);
 
-const royalPalette = ['#2f74ec','#1E4FA3','#16b487','#C9A84C','#7b5be0','#e0772b','#0a9396','#c43d3d','#3a7d52','#6b54d3','#1437a8','#9a7a2e'];
+// fixed colours per region (matches reference)
+const regionColors = { 'North India':'#2E7D32', 'West India':'#F4B942', 'East India':'#E87D8F', 'South India':'#42A5F5', 'Unknown':'#90A4AE' };
+const productPalette = ['#1E4FA3','#2E7D32','#F4B942','#E87D8F','#42A5F5','#7b5be0','#0a9396','#c43d3d','#3a7d52','#6b54d3','#1437a8','#9a7a2e'];
 
-// legend that shows "● Name - count"
-function legendWithCounts(chart) {
-  const ds = chart.data.datasets[0];
-  return chart.data.labels.map((label, i) => ({
-    text: label + ' - ' + ds.data[i],
-    fillStyle: royalPalette[i % royalPalette.length],
-    strokeStyle: royalPalette[i % royalPalette.length],
-    lineWidth: 0, pointStyle: 'circle', hidden: false, index: i
-  }));
-}
+const regionLabels = {{ region_labels|safe }};
+const regionValues = {{ region_values|safe }};
+const regionBg = regionLabels.map(l => regionColors[l] || '#90A4AE');
 
-// counts printed on slices (hide on very small slices to avoid clutter)
-function sliceLabels(minPct) {
-  return {
-    color: '#fff', font: { weight: '700', size: 12 },
-    textStrokeColor: 'rgba(0,0,0,.45)', textStrokeWidth: 3,
-    formatter: function (value, ctx) {
-      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-      return (value / total) * 100 >= minPct ? value : '';
-    }
+const productLabels = {{ product_labels|safe }};
+const productValues = {{ product_values|safe }};
+const productBg = productLabels.map((l, i) => productPalette[i % productPalette.length]);
+
+// legend: ■ Name - count
+function countLegend(labels, values, colors) {
+  return function () {
+    return labels.map((l, i) => ({ text: l + ' - ' + values[i], fillStyle: colors[i], strokeStyle: colors[i], lineWidth: 0, index: i }));
   };
 }
 
-new Chart(document.getElementById('productChart'), {
-  type: 'doughnut',
-  data: { labels: {{ product_labels|safe }}, datasets: [{ data: {{ product_values|safe }}, backgroundColor: royalPalette, borderColor: '#fff', borderWidth: 2, hoverOffset: 10 }] },
+// region: "Name" + "pct%" on each slice
+const regionLabelsOnSlice = {
+  color: '#fff', font: { weight: '700', size: 11 }, textAlign: 'center',
+  textStrokeColor: 'rgba(0,0,0,.4)', textStrokeWidth: 3,
+  formatter: function (v, ctx) {
+    const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
+    return [ctx.chart.data.labels[ctx.dataIndex], (v / t * 100).toFixed(1) + '%'];
+  }
+};
+// product: count on larger slices only
+const productLabelsOnSlice = {
+  color: '#fff', font: { weight: '700', size: 12 },
+  textStrokeColor: 'rgba(0,0,0,.4)', textStrokeWidth: 3,
+  formatter: function (v, ctx) {
+    const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
+    return (v / t * 100) >= 6 ? v : '';
+  }
+};
+
+new Chart(document.getElementById('regionChart'), {
+  type: 'pie',
+  data: { labels: regionLabels, datasets: [{ data: regionValues, backgroundColor: regionBg, borderColor: '#fff', borderWidth: 2 }] },
   options: {
-    cutout: '58%', animation: { animateScale: true },
+    animation: { animateScale: true },
     plugins: {
-      legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, padding: 8, font: { size: 11 }, generateLabels: legendWithCounts } },
-      datalabels: sliceLabels(6)
+      legend: { position: 'right', labels: { boxWidth: 14, padding: 10, font: { size: 12 }, generateLabels: countLegend(regionLabels, regionValues, regionBg) } },
+      datalabels: regionLabelsOnSlice
     }
   }
 });
 
-new Chart(document.getElementById('regionChart'), {
+new Chart(document.getElementById('productChart'), {
   type: 'pie',
-  data: { labels: {{ region_labels|safe }}, datasets: [{ data: {{ region_values|safe }}, backgroundColor: royalPalette, borderColor: '#fff', borderWidth: 2, hoverOffset: 10 }] },
+  data: { labels: productLabels, datasets: [{ data: productValues, backgroundColor: productBg, borderColor: '#fff', borderWidth: 2 }] },
   options: {
     animation: { animateScale: true },
     plugins: {
-      legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, padding: 10, font: { size: 12 }, generateLabels: legendWithCounts } },
-      datalabels: sliceLabels(0)
+      legend: { position: 'right', labels: { boxWidth: 14, padding: 8, font: { size: 11 }, generateLabels: countLegend(productLabels, productValues, productBg) } },
+      datalabels: productLabelsOnSlice
     }
   }
 });
