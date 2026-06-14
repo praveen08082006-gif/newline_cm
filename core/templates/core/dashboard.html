@@ -133,7 +133,7 @@ function countLegend(labels, values, colors) {
 // region: "Name" + "pct%" on each slice
 const regionLabelsOnSlice = {
   color: '#fff', font: { weight: '700', size: 11 }, textAlign: 'center',
-  textStrokeColor: 'rgba(0,0,0,.4)', textStrokeWidth: 3,
+  textShadowColor: 'rgba(15,27,60,.55)', textShadowBlur: 6,
   formatter: function (v, ctx) {
     const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
     return [ctx.chart.data.labels[ctx.dataIndex], (v / t * 100).toFixed(1) + '%'];
@@ -142,7 +142,7 @@ const regionLabelsOnSlice = {
 // product: count on larger slices only
 const productLabelsOnSlice = {
   color: '#fff', font: { weight: '700', size: 12 },
-  textStrokeColor: 'rgba(0,0,0,.4)', textStrokeWidth: 3,
+  textShadowColor: 'rgba(15,27,60,.55)', textShadowBlur: 6,
   formatter: function (v, ctx) {
     const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
     return (v / t * 100) >= 6 ? v : '';
