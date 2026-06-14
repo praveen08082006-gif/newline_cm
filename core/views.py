@@ -42,16 +42,22 @@ def dashboard(request):
     open_qs = qs.exclude(status__in=['Resolved', 'Closed'])
     resolved_qs = qs.filter(status__in=['Resolved', 'Closed'])
 
+    resolved_list = list(resolved_qs)
+    avg_days = round(sum(c.days_open for c in resolved_list) / len(resolved_list), 1) if resolved_list else 0
+
     context = {
         'active_menu': 'dashboard',
         'total': qs.count(),
         'open_count': open_qs.count(),
+        'pending_count': open_qs.count(),
         'resolved_count': resolved_qs.count(),
         'overdue_count': sum(1 for c in open_qs if c.days_open > 7),
+        'avg_days': avg_days,
         'product_labels': json.dumps([p['product__name'] or 'Unknown' for p in product_data]),
         'product_values': json.dumps([p['c'] for p in product_data]),
         'region_labels': json.dumps([r['region'] or 'Unknown' for r in region_data]),
         'region_values': json.dumps([r['c'] for r in region_data]),
+        'complaints': qs.select_related('product', 'spoc__user').order_by('-id'),
         'date_from': date_from or '',
         'date_to': date_to or '',
     }

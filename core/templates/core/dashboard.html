@@ -1,35 +1,32 @@
 {% extends 'core/base.html' %}
-{% block title %}Dashboard | Newline CMS{% endblock %}
+{% load static %}
+{% block title %}Dashboard | Newline Complaint Management{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 {% block breadcrumb %}<li class="breadcrumb-item active">Dashboard</li>{% endblock %}
 
 {% block content %}
 
-<!-- KPI cards -->
-<div class="row">
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-white">
-      <div class="inner"><h3 class="text-dark">{{ total }}</h3><p>Total Complaints</p></div>
-      <div class="icon"><i class="fas fa-clipboard-list text-primary"></i></div>
-    </div>
+<!-- Stat cards -->
+<div class="stat-grid">
+  <div class="stat-card stat-1">
+    <div class="stat-label">Total Complaints</div>
+    <div class="stat-value">{{ total }}</div>
+    <i class="fas fa-clipboard-list stat-icon"></i>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-white">
-      <div class="inner"><h3 class="text-primary">{{ open_count }}</h3><p>Open</p></div>
-      <div class="icon"><i class="fas fa-folder-open text-primary"></i></div>
-    </div>
+  <div class="stat-card stat-2">
+    <div class="stat-label">Resolved</div>
+    <div class="stat-value">{{ resolved_count }}</div>
+    <i class="fas fa-circle-check stat-icon"></i>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-white">
-      <div class="inner"><h3 class="text-success">{{ resolved_count }}</h3><p>Resolved</p></div>
-      <div class="icon"><i class="fas fa-check-circle text-success"></i></div>
-    </div>
+  <div class="stat-card stat-3">
+    <div class="stat-label">Pending</div>
+    <div class="stat-value">{{ pending_count }}</div>
+    <i class="fas fa-hourglass-half stat-icon"></i>
   </div>
-  <div class="col-lg-3 col-6">
-    <div class="small-box bg-white">
-      <div class="inner"><h3 class="text-danger">{{ overdue_count }}</h3><p>Overdue (&gt;7 days)</p></div>
-      <div class="icon"><i class="fas fa-triangle-exclamation text-danger"></i></div>
-    </div>
+  <div class="stat-card stat-4">
+    <div class="stat-label">Avg Days to Resolve</div>
+    <div class="stat-value">{{ avg_days }}</div>
+    <i class="fas fa-stopwatch stat-icon"></i>
   </div>
 </div>
 
@@ -53,43 +50,111 @@
   </div>
 </div>
 
+<!-- Compact charts -->
 <div class="row">
   <div class="col-lg-6">
     <div class="card">
       <div class="card-header"><span class="card-title">Product Wise Report</span></div>
-      <div class="card-body"><canvas id="productChart" height="260"></canvas></div>
+      <div class="card-body"><canvas id="productChart" height="210"></canvas></div>
     </div>
   </div>
   <div class="col-lg-6">
     <div class="card">
       <div class="card-header"><span class="card-title">Region Wise Report</span></div>
-      <div class="card-body"><canvas id="regionChart" height="260"></canvas></div>
+      <div class="card-body"><canvas id="regionChart" height="210"></canvas></div>
     </div>
+  </div>
+</div>
+
+<!-- Complaint list -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="card-title">Complaint List</span>
+    <a href="{% url 'complaint_add' %}" class="btn btn-gold btn-sm"><i class="fas fa-plus mr-1"></i>Add Complaint</a>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered table-hover dt-export">
+      <thead>
+        <tr>
+          <th>S.No</th><th>Ticket No</th><th>Model</th><th>Customer Name / No</th><th>SPOC</th>
+          <th>Distributor / Partner</th><th>Mobile</th><th>Region</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ c.ticket_no }}</td>
+          <td>{{ c.product.name }}</td>
+          <td>{{ c.customer_name }}<br><small class="text-muted">{{ c.customer_mobile }}</small></td>
+          <td>{{ c.spoc|default:"-" }}</td>
+          <td>{{ c.distributor_partner|default:"-" }}</td>
+          <td>{{ c.distributor_mobile|default:c.customer_mobile }}</td>
+          <td>{{ c.region }}</td>
+          <td><span class="status-pill status-{{ c.status|lower|cut:' ' }}">{{ c.status }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted">No complaints yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
-const royalPalette = ['#1259d6','#2f74ec','#caa24a','#1f8f4e','#c62828','#7b3fe4','#0a9396','#ee9b00','#9b2226','#005f73','#bb3e03','#94d2bd'];
+Chart.register(ChartDataLabels);
+
+const royalPalette = ['#2f74ec','#1E4FA3','#16b487','#C9A84C','#7b5be0','#e0772b','#0a9396','#c43d3d','#3a7d52','#6b54d3','#1437a8','#9a7a2e'];
+
+// legend that shows "● Name - count"
+function legendWithCounts(chart) {
+  const ds = chart.data.datasets[0];
+  return chart.data.labels.map((label, i) => ({
+    text: label + ' - ' + ds.data[i],
+    fillStyle: royalPalette[i % royalPalette.length],
+    strokeStyle: royalPalette[i % royalPalette.length],
+    lineWidth: 0, pointStyle: 'circle', hidden: false, index: i
+  }));
+}
+
+// counts printed on slices (hide on very small slices to avoid clutter)
+function sliceLabels(minPct) {
+  return {
+    color: '#fff', font: { weight: '700', size: 12 },
+    textStrokeColor: 'rgba(0,0,0,.45)', textStrokeWidth: 3,
+    formatter: function (value, ctx) {
+      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+      return (value / total) * 100 >= minPct ? value : '';
+    }
+  };
+}
 
 new Chart(document.getElementById('productChart'), {
   type: 'doughnut',
-  data: {
-    labels: {{ product_labels|safe }},
-    datasets: [{ data: {{ product_values|safe }}, backgroundColor: royalPalette, borderWidth: 1 }]
-  },
-  options: { plugins: { legend: { position: 'right', labels:{ boxWidth:12, font:{size:11} } } } }
+  data: { labels: {{ product_labels|safe }}, datasets: [{ data: {{ product_values|safe }}, backgroundColor: royalPalette, borderColor: '#fff', borderWidth: 2, hoverOffset: 10 }] },
+  options: {
+    cutout: '58%', animation: { animateScale: true },
+    plugins: {
+      legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, padding: 8, font: { size: 11 }, generateLabels: legendWithCounts } },
+      datalabels: sliceLabels(6)
+    }
+  }
 });
 
 new Chart(document.getElementById('regionChart'), {
   type: 'pie',
-  data: {
-    labels: {{ region_labels|safe }},
-    datasets: [{ data: {{ region_values|safe }}, backgroundColor: royalPalette, borderWidth: 1 }]
-  },
-  options: { plugins: { legend: { position: 'right' } } }
+  data: { labels: {{ region_labels|safe }}, datasets: [{ data: {{ region_values|safe }}, backgroundColor: royalPalette, borderColor: '#fff', borderWidth: 2, hoverOffset: 10 }] },
+  options: {
+    animation: { animateScale: true },
+    plugins: {
+      legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, padding: 10, font: { size: 12 }, generateLabels: legendWithCounts } },
+      datalabels: sliceLabels(0)
+    }
+  }
 });
 </script>
 {% endblock %}

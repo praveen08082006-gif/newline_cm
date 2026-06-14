@@ -21,7 +21,7 @@
   <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image-v2.png' %}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;700&family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
@@ -204,7 +204,9 @@ $(function () {
       dom: "<'row'<'col-sm-6'B><'col-sm-6'f>>rtip",
       buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
       pageLength: 25,
-      order: []
+      order: [],
+      scrollX: true,
+      responsive: false
     });
   });
 });

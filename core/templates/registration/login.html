@@ -24,7 +24,7 @@
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;700&family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- AdminLTE + FontAwesome (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
@@ -32,47 +32,74 @@
   <link rel="stylesheet" href="{% static 'css/royale.css' %}">
 </head>
 <body class="hold-transition login-page">
-<div class="royale-login">
+<div class="login-stage">
 
-  <div class="brand">
-    {% include 'core/_logo.html' %}
+  <!-- LEFT: brand + reserved space for the 3D flat-panel model -->
+  <div class="login-visual">
+    <div class="brand">{% include 'core/_logo.html' %}</div>
+
+    <!-- Animated flat-panel display (CSS). Swap for a real 3D <model-viewer> if a .glb is provided. -->
+    <div class="ifp" aria-hidden="true">
+      <div class="ifp-frame">
+        <span class="ifp-cam"></span>
+        <div class="ifp-screen">
+          <div class="ifp-clock">19:27</div>
+          <div class="ifp-day">Interactive Flat Panel</div>
+          <div class="ifp-apps">
+            <span><i class="fas fa-desktop"></i></span>
+            <span><i class="fas fa-display"></i></span>
+            <span><i class="fas fa-chalkboard"></i></span>
+          </div>
+          <div class="ifp-brand">newline</div>
+        </div>
+      </div>
+      <div class="ifp-neck"></div>
+      <div class="ifp-base"></div>
+    </div>
+
+    <div class="tag">Interactive Flat Panel Displays</div>
   </div>
 
-  <div class="card">
-    <div class="card-body login-card-body">
-      <h5 class="login-title">Welcome back</h5>
-      <p class="login-box-msg">Sign in to your account</p>
+  <!-- RIGHT: glass login card -->
+  <div class="login-panel">
+    <div class="royale-login">
+      <div class="card">
+        <div class="card-body login-card-body">
+          <h5 class="login-title">Welcome back</h5>
+          <p class="login-box-msg">Sign in to your account</p>
 
-      {% if form.errors %}
-        <div class="alert alert-danger py-2">
-          <i class="fas fa-circle-exclamation mr-1"></i>
-          Username and password didn't match. Please try again.
-        </div>
-      {% endif %}
+          {% if form.errors %}
+            <div class="alert alert-danger py-2">
+              <i class="fas fa-circle-exclamation mr-1"></i>
+              Username and password didn't match. Please try again.
+            </div>
+          {% endif %}
 
-      <form action="{% url 'login' %}" method="post">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-          <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
-          <div class="input-group-append">
-            <div class="input-group-text"><span class="fas fa-user"></span></div>
-          </div>
+          <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+              <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
+              <div class="input-group-append">
+                <div class="input-group-text"><span class="fas fa-user"></span></div>
+              </div>
+            </div>
+            <div class="input-group mb-4">
+              <input type="password" name="password" class="form-control" placeholder="Password" required>
+              <div class="input-group-append">
+                <div class="input-group-text"><span class="fas fa-lock"></span></div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-block btn-signin text-white">
+              <i class="fas fa-right-to-bracket mr-1"></i> Sign In
+            </button>
+            <input type="hidden" name="next" value="{{ next }}">
+          </form>
         </div>
-        <div class="input-group mb-4">
-          <input type="password" name="password" class="form-control" placeholder="Password" required>
-          <div class="input-group-append">
-            <div class="input-group-text"><span class="fas fa-lock"></span></div>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-block btn-signin text-white">
-          <i class="fas fa-right-to-bracket mr-1"></i> Sign In
-        </button>
-        <input type="hidden" name="next" value="{{ next }}">
-      </form>
+      </div>
+      <p class="login-footnote">&copy; {% now "Y" %} Newline &middot; Complaint Management System</p>
     </div>
   </div>
 
-  <p class="login-footnote">&copy; {% now "Y" %} Newline &middot; Complaint Management System</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
