@@ -34,14 +34,9 @@
 <body class="hold-transition login-page">
 <div class="login-stage">
 
-  <!-- LEFT: brand + reserved space for the 3D flat-panel model -->
+  <!-- LEFT: pure-CSS 3D interactive flat-panel display -->
   <div class="login-visual">
-    <div class="brand">{% include 'core/_logo.html' %}</div>
-
-    <!-- Newline interactive flat-panel display -->
-    <img src="{% static 'img/panel-display.png' %}" alt="Newline interactive flat panel display" class="login-display">
-
-    <div class="tag">Interactive Flat Panel Displays</div>
+    <img src="{% static 'img/flat-panel.jpg' %}" class="login-display" alt="Newline interactive flat panel display">
   </div>
 
   <!-- RIGHT: glass login card -->
@@ -49,6 +44,8 @@
     <div class="royale-login">
       <div class="card">
         <div class="card-body login-card-body">
+          <img src="{% static 'img/newline-logo.png' %}" class="login-card-logo" alt="newline">
+          <p class="login-tagline">Connect. Create. Collaborate.</p>
           <h5 class="login-title">Welcome back</h5>
           <p class="login-box-msg">Sign in to your account</p>
 
