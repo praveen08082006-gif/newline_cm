@@ -252,11 +252,12 @@ body.login-page::after { width: 300px; height: 300px; bottom: -80px; right: 8%;
   50%      { transform: perspective(1300px) rotateX(4deg) rotateY(-7deg) translateY(-16px); }
 }
 .login-display {
-  width: min(580px, 82%); height: auto; border-radius: 14px;
-  box-shadow: 0 46px 92px rgba(0,0,0,.6);
+  width: min(600px, 86%); height: auto;
+  /* device-shaped shadow + soft blue glow for a premium float */
+  filter: drop-shadow(0 28px 46px rgba(0,0,0,.55)) drop-shadow(0 0 44px rgba(79,142,247,.22));
   animation: floatTilt 8s ease-in-out infinite;
 }
-.login-display:hover { box-shadow: 0 54px 110px rgba(0,0,0,.72); }
+.login-display:hover { filter: drop-shadow(0 34px 58px rgba(0,0,0,.62)) drop-shadow(0 0 64px rgba(79,142,247,.36)); }
 .login-visual .tag { color: rgba(255,255,255,.55); font-size: .95rem; letter-spacing: 3px; text-transform: uppercase; }
 
 /* RIGHT: glass login card */
