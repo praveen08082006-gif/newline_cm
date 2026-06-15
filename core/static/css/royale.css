@@ -243,10 +243,10 @@ body.login-page::after { width: 300px; height: 300px; bottom: -80px; right: 8%;
 /* LEFT: reserved space for the 3D flat-panel model */
 .login-visual {
   flex: 1.25; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 3vw; gap: 18px; text-align: center;
+  padding: 4vw; gap: 26px; text-align: center;
 }
-.login-visual .brand .nl-logo { width: 230px; max-width: 60%; filter: drop-shadow(0 8px 22px rgba(0,0,0,.45)); animation: fadeUp .8s ease both; }
-.login-visual .tag { color: rgba(255,255,255,.55); font-size: .78rem; letter-spacing: 3px; text-transform: uppercase; }
+.login-visual .brand .nl-logo { width: 300px; max-width: 70%; filter: drop-shadow(0 10px 30px rgba(0,0,0,.5)); animation: fadeUp .8s ease both; }
+.login-visual .tag { color: rgba(255,255,255,.55); font-size: .85rem; letter-spacing: 3px; text-transform: uppercase; }
 /* Newline flat-panel display image — floats with a subtle 3D tilt */
 @keyframes floatTilt {
   0%, 100% { transform: perspective(1300px) rotateX(4deg) rotateY(-7deg) translateY(0); }
@@ -314,8 +314,8 @@ body.login-page::after { width: 300px; height: 300px; bottom: -80px; right: 8%;
   50%      { transform: perspective(1500px) rotateY(-8deg) translateY(-14px); }
 }
 .login-display {
-  width: min(400px, 58%); height: auto; border-radius: 8px; margin: 4px auto 0;
-  filter: drop-shadow(0 24px 44px rgba(0,0,0,.5)) drop-shadow(0 0 40px rgba(21,101,192,.2));
+  width: min(680px, 94%); height: auto; border-radius: 8px;
+  filter: drop-shadow(0 38px 64px rgba(0,0,0,.55)) drop-shadow(0 0 54px rgba(21,101,192,.22));
   animation: loginFloat 6s ease-in-out infinite;
 }
 
