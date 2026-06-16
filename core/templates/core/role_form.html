@@ -14,7 +14,14 @@
         {{ form.name }}
         {% for e in form.name.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
       </div>
-      <div class="text-right"><button type="submit" class="btn btn-primary px-4">Submit</button></div>
+      <label class="d-block mb-2">Complaint Permissions</label>
+      <div class="d-flex flex-wrap" style="gap:24px;">
+        <div class="form-check">{{ form.can_add }} <label class="form-check-label" for="{{ form.can_add.id_for_label }}">Add</label></div>
+        <div class="form-check">{{ form.can_edit }} <label class="form-check-label" for="{{ form.can_edit.id_for_label }}">Edit</label></div>
+        <div class="form-check">{{ form.can_delete }} <label class="form-check-label" for="{{ form.can_delete.id_for_label }}">Delete</label></div>
+        <div class="form-check">{{ form.can_view }} <label class="form-check-label" for="{{ form.can_view.id_for_label }}">View</label></div>
+      </div>
+      <div class="text-right mt-3"><button type="submit" class="btn btn-primary px-4">Submit</button></div>
     </form>
   </div>
 </div>

@@ -194,11 +194,19 @@ label { font-weight: 600; color: #3a455c; margin-bottom: 7px; }
 .badge-days.success { background: #e3f6ec; color: #1c8a52; box-shadow: 0 2px 8px rgba(28,138,82,.18); }
 .badge-days.warning { background: #fdf2da; color: #a9791b; box-shadow: 0 2px 8px rgba(169,121,27,.18); }
 .badge-days.danger  { background: #fde6e6; color: #c43d3d; box-shadow: 0 2px 8px rgba(196,61,61,.18); }
-.status-pill { border-radius: 20px; padding: .4em .95em; font-weight: 600; font-size: .76rem; display: inline-block; }
+.status-pill { border-radius: 20px; padding: .4em .95em; font-weight: 600; font-size: .76rem; display: inline-block; background: #eef0f4; color: #5a6172; white-space: nowrap; }
 .status-open       { background: #e8f0fd; color: var(--royal); }
 .status-inprogress { background: #fdf2da; color: #a9791b; }
 .status-caselocked { background: linear-gradient(100deg,var(--navy),var(--royal)); color:#fff; box-shadow:0 4px 12px rgba(30,79,163,.3); }
-.status-resolved   { background: #e3f6ec; color: #1c8a52; box-shadow: 0 3px 10px rgba(28,138,82,.25); }
+.status-resolved,
+.status-resolvedafterpanelreplacement { background: #e3f6ec; color: #1c8a52; }
+.status-replaced   { background: #e8f0fd; color: var(--royal); }
+.status-reopen     { background: #fdf2da; color: #a9791b; }
+.status-abort      { background: #eef0f4; color: var(--muted); }
+.status-broken-parts,
+.status-broken-technicalsupport,
+.status-broken-replacement,
+.status-notrespondedcalls { background: #fde6e6; color: #c43d3d; }
 .status-closed     { background: #eef0f4; color: var(--muted); }
 
 /* ---------- DataTables (mobile scroll) ---------- */

@@ -12,43 +12,76 @@
     <form method="post">
       {% csrf_token %}
       <div class="row">
-        <div class="col-md-6 form-group">
-          <label>Product <span class="text-required">*</span></label>
-          {{ form.product }}
-          {% for e in form.product.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>Region <span class="text-required">*</span></label>
-          {{ form.region }}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>Customer Name <span class="text-required">*</span></label>
-          {{ form.customer_name }}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>Customer Mobile <span class="text-required">*</span></label>
-          {{ form.customer_mobile }}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>SPOC</label>
-          {{ form.spoc }}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>Distributor / Partner</label>
-          {{ form.distributor_partner }}
-        </div>
-        <div class="col-md-6 form-group">
-          <label>Distributor Mobile</label>
-          {{ form.distributor_mobile }}
-        </div>
-        <div class="col-md-6 form-group">
+        <div class="col-md-4 form-group">
           <label>Registration Date <span class="text-required">*</span></label>
           {{ form.registration_date }}
         </div>
-        <div class="col-md-6 form-group">
+        <div class="col-md-4 form-group">
+          <label>Model / Product <span class="text-required">*</span></label>
+          {{ form.product }}
+          {% for e in form.product.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Complaint Type</label>
+          {{ form.complaint_type }}
+        </div>
+
+        <div class="col-md-4 form-group">
+          <label>Customer Name <span class="text-required">*</span></label>
+          {{ form.customer_name }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Contact Number <span class="text-required">*</span></label>
+          {{ form.customer_mobile }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Email</label>
+          {{ form.customer_email }}
+        </div>
+
+        <div class="col-md-4 form-group">
+          <label>Region <span class="text-required">*</span></label>
+          {{ form.region }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>State</label>
+          {{ form.state }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>District</label>
+          {{ form.district }}
+        </div>
+
+        <div class="col-md-4 form-group">
+          <label>Pincode</label>
+          {{ form.pincode }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Country</label>
+          {{ form.country }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Call</label>
+          {{ form.call }}
+        </div>
+
+        <div class="col-md-4 form-group">
+          <label>SPOC</label>
+          {{ form.spoc }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Distributor / Partner</label>
+          {{ form.distributor_partner }}
+        </div>
+        <div class="col-md-4 form-group">
+          <label>Distributor Mobile</label>
+          {{ form.distributor_mobile }}
+        </div>
+
+        <div class="col-md-4 form-group">
           <label>Status</label>
           {{ form.status }}
-          <small class="text-muted">Set to Resolved/Closed to auto-stamp the closed date.</small>
+          <small class="text-muted d-block">Resolved/Replaced auto-stamps the closed date.</small>
         </div>
         <div class="col-md-12 form-group">
           <label>Description</label>

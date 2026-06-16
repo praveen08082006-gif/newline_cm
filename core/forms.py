@@ -4,9 +4,11 @@ from .models import Complaint, Employee, FAQ, Product, Series, UserRole
 
 
 def _style(fields, placeholder_map=None):
-    """Add Bootstrap classes + placeholders to a set of form fields."""
+    """Add Bootstrap classes + placeholders (skips checkboxes)."""
     placeholder_map = placeholder_map or {}
     for name, field in fields.items():
+        if isinstance(field.widget, forms.CheckboxInput):
+            continue
         css = 'custom-select' if isinstance(field.widget, forms.Select) else 'form-control'
         field.widget.attrs.setdefault('class', css)
         if name in placeholder_map:
@@ -37,7 +39,7 @@ class ProductForm(forms.ModelForm):
 class UserRoleForm(forms.ModelForm):
     class Meta:
         model = UserRole
-        fields = ['name']
+        fields = ['name', 'can_add', 'can_edit', 'can_delete', 'can_view']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,15 +47,18 @@ class UserRoleForm(forms.ModelForm):
 
 
 class EmployeeForm(forms.ModelForm):
-    """Add Employee form — also creates the underlying login User."""
+    """Add/Edit Employee — also creates/updates the underlying login User."""
     employee_name = forms.CharField(label='Employee Name', max_length=150)
     email = forms.EmailField(label='Official Email ID')
+    password = forms.CharField(
+        label='Password', required=False, widget=forms.PasswordInput(render_value=False),
+        help_text='On add: leave blank for default "Newline@123". On edit: leave blank to keep current.')
 
     class Meta:
         model = Employee
         fields = ['user_type', 'region', 'contact_no', 'role']
 
-    field_order = ['employee_name', 'user_type', 'region', 'contact_no', 'email', 'role']
+    field_order = ['employee_name', 'user_type', 'region', 'contact_no', 'email', 'role', 'password']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,6 +68,7 @@ class EmployeeForm(forms.ModelForm):
             'employee_name': 'Enter Employee Name',
             'contact_no': 'Enter Mobile No',
             'email': 'Enter Official Email ID',
+            'password': 'Set / reset password',
         })
 
 
@@ -70,9 +76,10 @@ class ComplaintForm(forms.ModelForm):
     class Meta:
         model = Complaint
         fields = [
-            'product', 'customer_name', 'customer_mobile',
-            'spoc', 'distributor_partner', 'distributor_mobile',
-            'region', 'status', 'registration_date', 'description',
+            'registration_date', 'product', 'customer_name', 'customer_mobile', 'customer_email',
+            'complaint_type', 'spoc', 'distributor_partner', 'distributor_mobile',
+            'region', 'state', 'district', 'pincode', 'country', 'call',
+            'status', 'description',
         ]
         widgets = {
             'registration_date': forms.DateInput(attrs={'type': 'date'}),
@@ -85,9 +92,16 @@ class ComplaintForm(forms.ModelForm):
         self.fields['spoc'].empty_label = 'Select SPOC'
         _style(self.fields, {
             'customer_name': 'Enter Customer Name',
-            'customer_mobile': 'Enter Customer Mobile',
+            'customer_mobile': 'Enter Contact Number',
+            'customer_email': 'Enter Email',
+            'complaint_type': 'Enter Complaint Type',
             'distributor_partner': 'Enter Distributor / Partner',
             'distributor_mobile': 'Enter Distributor Mobile',
+            'state': 'Enter State',
+            'district': 'Enter District',
+            'pincode': 'Enter Pincode',
+            'country': 'Enter Country',
+            'call': 'Call',
         })
 
 

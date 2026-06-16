@@ -48,6 +48,10 @@
           <i class="fas fa-angle-down ml-1"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
+          <a href="{% url 'change_password' %}" class="dropdown-item">
+            <i class="fas fa-key mr-2"></i> Change Password
+          </a>
+          <div class="dropdown-divider"></div>
           <a href="{% url 'logout' %}" class="dropdown-item">
             <i class="fas fa-sign-out-alt mr-2"></i> Logout
           </a>
@@ -72,7 +76,7 @@
             </a>
           </li>
 
-          {% if is_privileged %}
+          {% if is_super %}
           <li class="nav-item {% if active_menu == 'users' %}menu-open{% endif %}">
             <a href="#" class="nav-link {% if active_menu == 'users' %}active{% endif %}">
               <i class="nav-icon fas fa-users"></i><p>Users<i class="right fas fa-angle-left"></i></p>
@@ -124,6 +128,7 @@
             </ul>
           </li>
 
+          {% if is_super %}
           <li class="nav-item {% if active_menu == 'faq' %}menu-open{% endif %}">
             <a href="#" class="nav-link {% if active_menu == 'faq' %}active{% endif %}">
               <i class="nav-icon fas fa-question-circle"></i><p>FAQ Management<i class="right fas fa-angle-left"></i></p>
@@ -133,6 +138,7 @@
               <li class="nav-item"><a href="{% url 'faq_list' %}" class="nav-link"><p>FAQ List</p></a></li>
             </ul>
           </li>
+          {% endif %}
 
           <li class="nav-item">
             <a href="{% url 'reports' %}" class="nav-link {% if active_menu == 'reports' %}active{% endif %}">
@@ -201,8 +207,9 @@
 $(function () {
   $('table.dt-export').each(function () {
     $(this).DataTable({
-      dom: "<'row'<'col-sm-6'B><'col-sm-6'f>>rtip",
+      dom: "<'row mb-2'<'col-sm-5'B><'col-sm-3'l><'col-sm-4'f>>rtip",
       buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
       pageLength: 25,
       order: [],
       scrollX: true,

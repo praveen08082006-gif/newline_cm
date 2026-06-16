@@ -2,17 +2,30 @@ import json
 from datetime import date, timedelta
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import (ComplaintForm, EmployeeForm, FAQForm, ProductForm,
                     SeriesForm, UserRoleForm)
-from .models import Complaint, Employee, FAQ, Product, Series, UserRole
+from .models import (Complaint, Employee, FAQ, Product, RESOLVED_STATUSES,
+                     Series, UserRole)
 
-# User types that are allowed to see the whole system (MD sees everything).
+# Super admins (and MD) see every region; everyone else is region-locked.
+SUPER_TYPES = {'Super Admin', 'MD'}
 PRIVILEGED = {'Super Admin', 'Admin', 'MD'}
+
+
+def _is_super(user):
+    if user.is_superuser:
+        return True
+    emp = getattr(user, 'employee', None)
+    return bool(emp and emp.user_type in SUPER_TYPES)
 
 
 def _is_privileged(user):
@@ -22,10 +35,30 @@ def _is_privileged(user):
     return bool(emp and emp.user_type in PRIVILEGED)
 
 
+def _user_region(user):
+    emp = getattr(user, 'employee', None)
+    return emp.region if emp else ''
+
+
+def scope_complaints(user):
+    """All complaints for super admins; only the user's region for normal admins."""
+    qs = Complaint.objects.select_related('product', 'spoc__user')
+    if _is_super(user):
+        return qs
+    region = _user_region(user)
+    if region:
+        return qs.filter(region=region)
+    return qs.filter(created_by=user)   # no region assigned -> only own
+
+
+# super-admin-only views (user/role/series/product management)
+super_admin_required = user_passes_test(_is_super, login_url='dashboard')
+
+
 # ---------------------------------------------------------------- Dashboard
 @login_required
 def dashboard(request):
-    qs = Complaint.objects.all()
+    qs = scope_complaints(request.user)   # region-locked for normal admins
 
     # optional date filter (From / To on registration_date)
     date_from = request.GET.get('from')
@@ -35,12 +68,11 @@ def dashboard(request):
     if date_to:
         qs = qs.filter(registration_date__lte=date_to)
 
-    # Product-wise (donut) and Region-wise (pie) aggregates
     product_data = list(qs.values('product__name').annotate(c=Count('id')).order_by('-c'))
     region_data = list(qs.values('region').annotate(c=Count('id')).order_by('-c'))
 
-    open_qs = qs.exclude(status__in=['Resolved', 'Closed'])
-    resolved_qs = qs.filter(status__in=['Resolved', 'Closed'])
+    resolved_qs = qs.filter(status__in=RESOLVED_STATUSES)
+    open_qs = qs.exclude(status__in=RESOLVED_STATUSES)
 
     resolved_list = list(resolved_qs)
     avg_days = round(sum(c.days_open for c in resolved_list) / len(resolved_list), 1) if resolved_list else 0
@@ -57,15 +89,16 @@ def dashboard(request):
         'product_values': json.dumps([p['c'] for p in product_data]),
         'region_labels': json.dumps([r['region'] or 'Unknown' for r in region_data]),
         'region_values': json.dumps([r['c'] for r in region_data]),
-        'complaints': qs.select_related('product', 'spoc__user').order_by('-id'),
+        'complaints': qs.order_by('-id')[:300],   # cap for dashboard render; full list on Complaint page
         'date_from': date_from or '',
         'date_to': date_to or '',
+        'region_locked': (not _is_super(request.user)) and _user_region(request.user),
     }
     return render(request, 'core/dashboard.html', context)
 
 
 # ---------------------------------------------------------------- Series
-@login_required
+@super_admin_required
 def series_add(request):
     form = SeriesForm(request.POST or None)
     if form.is_valid():
@@ -75,7 +108,7 @@ def series_add(request):
     return render(request, 'core/series_form.html', {'form': form, 'active_menu': 'series'})
 
 
-@login_required
+@super_admin_required
 def series_edit(request, pk):
     obj = get_object_or_404(Series, pk=pk)
     form = SeriesForm(request.POST or None, instance=obj)
@@ -86,13 +119,13 @@ def series_edit(request, pk):
     return render(request, 'core/series_form.html', {'form': form, 'active_menu': 'series', 'editing': obj})
 
 
-@login_required
+@super_admin_required
 def series_list(request):
     return render(request, 'core/series_list.html',
                   {'rows': Series.objects.all(), 'active_menu': 'series'})
 
 
-@login_required
+@super_admin_required
 def series_delete(request, pk):
     get_object_or_404(Series, pk=pk).delete()
     messages.success(request, 'Series deleted.')
@@ -100,7 +133,7 @@ def series_delete(request, pk):
 
 
 # ---------------------------------------------------------------- Product
-@login_required
+@super_admin_required
 def product_add(request):
     form = ProductForm(request.POST or None)
     if form.is_valid():
@@ -110,7 +143,7 @@ def product_add(request):
     return render(request, 'core/product_form.html', {'form': form, 'active_menu': 'product'})
 
 
-@login_required
+@super_admin_required
 def product_edit(request, pk):
     obj = get_object_or_404(Product, pk=pk)
     form = ProductForm(request.POST or None, instance=obj)
@@ -121,13 +154,13 @@ def product_edit(request, pk):
     return render(request, 'core/product_form.html', {'form': form, 'active_menu': 'product', 'editing': obj})
 
 
-@login_required
+@super_admin_required
 def product_list(request):
     return render(request, 'core/product_list.html',
                   {'rows': Product.objects.select_related('series').all(), 'active_menu': 'product'})
 
 
-@login_required
+@super_admin_required
 def product_delete(request, pk):
     get_object_or_404(Product, pk=pk).delete()
     messages.success(request, 'Product deleted.')
@@ -135,7 +168,7 @@ def product_delete(request, pk):
 
 
 # ---------------------------------------------------------------- User Roles
-@login_required
+@super_admin_required
 def role_add(request):
     form = UserRoleForm(request.POST or None)
     if form.is_valid():
@@ -145,7 +178,7 @@ def role_add(request):
     return render(request, 'core/role_form.html', {'form': form, 'active_menu': 'user_roles'})
 
 
-@login_required
+@super_admin_required
 def role_edit(request, pk):
     obj = get_object_or_404(UserRole, pk=pk)
     form = UserRoleForm(request.POST or None, instance=obj)
@@ -156,13 +189,13 @@ def role_edit(request, pk):
     return render(request, 'core/role_form.html', {'form': form, 'active_menu': 'user_roles', 'editing': obj})
 
 
-@login_required
+@super_admin_required
 def role_list(request):
     return render(request, 'core/role_list.html',
                   {'rows': UserRole.objects.all(), 'active_menu': 'user_roles'})
 
 
-@login_required
+@super_admin_required
 def role_delete(request, pk):
     get_object_or_404(UserRole, pk=pk).delete()
     messages.success(request, 'Role deleted.')
@@ -170,12 +203,13 @@ def role_delete(request, pk):
 
 
 # ---------------------------------------------------------------- Employees / Users
-@login_required
+@super_admin_required
 def employee_add(request):
     form = EmployeeForm(request.POST or None)
     if form.is_valid():
         name = form.cleaned_data['employee_name']
         email = form.cleaned_data['email']
+        password = form.cleaned_data.get('password') or 'Newline@123'
         # build a login user from the email (username = part before @)
         username = email.split('@')[0]
         base, n = username, 1
@@ -184,18 +218,31 @@ def employee_add(request):
             n += 1
         parts = name.split(' ', 1)
         user = User.objects.create_user(
-            username=username, email=email, password='Newline@123',
+            username=username, email=email, password=password,
             first_name=parts[0], last_name=parts[1] if len(parts) > 1 else '',
         )
         emp = form.save(commit=False)
         emp.user = user
         emp.save()
-        messages.success(request, f'Employee "{name}" added. Temp password: Newline@123')
+        messages.success(request, f'Employee "{name}" added (login: {username}).')
         return redirect('employee_list')
     return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users'})
 
 
-@login_required
+@super_admin_required
+def employee_toggle(request, pk):
+    """Activate / deactivate a user account."""
+    emp = get_object_or_404(Employee, pk=pk)
+    emp.is_active = not emp.is_active
+    emp.save(update_fields=['is_active'])
+    if emp.user:
+        emp.user.is_active = emp.is_active
+        emp.user.save(update_fields=['is_active'])
+    messages.success(request, f'{emp} is now {"Active" if emp.is_active else "Inactive"}.')
+    return redirect('employee_list')
+
+
+@super_admin_required
 def employee_edit(request, pk):
     emp = get_object_or_404(Employee, pk=pk)
     initial = {'employee_name': emp.user.get_full_name() or emp.user.username,
@@ -209,13 +256,16 @@ def employee_edit(request, pk):
         emp.user.first_name = parts[0]
         emp.user.last_name = parts[1] if len(parts) > 1 else ''
         emp.user.email = form.cleaned_data['email']
+        new_password = form.cleaned_data.get('password')
+        if new_password:
+            emp.user.set_password(new_password)   # super admin can reset any user's password
         emp.user.save()
         messages.success(request, f'Employee "{name}" updated.')
         return redirect('employee_list')
     return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users', 'editing': emp})
 
 
-@login_required
+@super_admin_required
 def employee_list(request):
     rows = Employee.objects.select_related('user', 'role').all()
     region = request.GET.get('region')
@@ -232,7 +282,7 @@ def employee_list(request):
     })
 
 
-@login_required
+@super_admin_required
 def employee_delete(request, pk):
     emp = get_object_or_404(Employee, pk=pk)
     if emp.user:
@@ -258,13 +308,7 @@ def complaint_add(request):
 
 @login_required
 def complaint_list(request):
-    rows = Complaint.objects.select_related('product', 'spoc__user').all()
-    # Employees who are NOT privileged only see complaints they created/own
-    if not _is_privileged(request.user):
-        emp = getattr(request.user, 'employee', None)
-        rows = rows.filter(created_by=request.user) if emp is None else \
-            rows.filter(spoc=emp) | rows.filter(created_by=request.user)
-        rows = rows.distinct()
+    rows = scope_complaints(request.user)   # region-locked for normal admins
 
     product = request.GET.get('product')
     region = request.GET.get('region')
@@ -275,13 +319,16 @@ def complaint_list(request):
         rows = rows.filter(region=region)
     if status and status != 'All':
         rows = rows.filter(status=status)
+    rows = rows.order_by('-id')
 
     return render(request, 'core/complaint_list.html', {
-        'rows': rows.order_by('-id'),
+        'rows': rows,
+        'total_count': rows.count(),
         'active_menu': 'complaint',
         'products': Product.objects.all(),
         'regions': [c[0] for c in Complaint._meta.get_field('region').choices],
         'statuses': [c[0] for c in Complaint.STATUS_CHOICES],
+        'region_locked': (not _is_super(request.user)) and _user_region(request.user),
     })
 
 
@@ -305,7 +352,7 @@ def complaint_delete(request, pk):
 
 
 # ---------------------------------------------------------------- FAQ
-@login_required
+@super_admin_required
 def faq_add(request):
     form = FAQForm(request.POST or None)
     if form.is_valid():
@@ -315,7 +362,7 @@ def faq_add(request):
     return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq'})
 
 
-@login_required
+@super_admin_required
 def faq_edit(request, pk):
     obj = get_object_or_404(FAQ, pk=pk)
     form = FAQForm(request.POST or None, instance=obj)
@@ -326,13 +373,13 @@ def faq_edit(request, pk):
     return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq', 'editing': obj})
 
 
-@login_required
+@super_admin_required
 def faq_list(request):
     return render(request, 'core/faq_list.html',
                   {'rows': FAQ.objects.all(), 'active_menu': 'faq'})
 
 
-@login_required
+@super_admin_required
 def faq_delete(request, pk):
     get_object_or_404(FAQ, pk=pk).delete()
     messages.success(request, 'FAQ deleted.')
@@ -342,39 +389,62 @@ def faq_delete(request, pk):
 # ---------------------------------------------------------------- Reports
 @login_required
 def reports(request):
-    """Resolution-time report with day buckets + per-employee performance."""
-    resolved = Complaint.objects.filter(status__in=['Resolved', 'Closed'])
-    open_complaints = Complaint.objects.exclude(status__in=['Resolved', 'Closed'])
+    """Per-employee call record: total calls, abort, avg days, pending + day buckets.
+    Super admin sees all regions; normal admin only their region."""
+    all_c = list(scope_complaints(request.user))
 
-    buckets = {'0-2': 0, '>2<7': 0, '>7<15': 0, '>15<30': 0, '>30': 0}
-    for c in resolved:
-        d = c.days_open
-        if d <= 2:
-            buckets['0-2'] += 1
-        elif d < 7:
-            buckets['>2<7'] += 1
-        elif d < 15:
-            buckets['>7<15'] += 1
-        elif d < 30:
-            buckets['>15<30'] += 1
+    # group by SPOC employee
+    rows = {}
+    for c in all_c:
+        emp = c.spoc
+        key = emp.id if emp else 0
+        if key not in rows:
+            rows[key] = {
+                'region': (emp.region if emp else c.region) or '-',
+                'emp': str(emp) if emp else 'Unassigned',
+                'total': 0, 'abort': 0, 'pending': 0,
+                'resolved_days': [], 'b27': 0, 'b715': 0, 'b1530': 0,
+            }
+        r = rows[key]
+        r['total'] += 1
+        if c.status == 'Abort':
+            r['abort'] += 1
+        if c.is_resolved:
+            r['resolved_days'].append(c.days_open)
         else:
-            buckets['>30'] += 1
+            r['pending'] += 1
+            d = c.days_open                      # pending-call day buckets
+            if 2 < d <= 7:
+                r['b27'] += 1
+            elif 7 < d <= 15:
+                r['b715'] += 1
+            elif 15 < d <= 30:
+                r['b1530'] += 1
 
-    # employee performance: resolved count + average days to close
-    perf = []
-    for emp in Employee.objects.select_related('user').all():
-        emp_resolved = [c for c in resolved if c.spoc_id == emp.id]
-        if not emp_resolved:
-            continue
-        avg_days = round(sum(c.days_open for c in emp_resolved) / len(emp_resolved), 1)
-        perf.append({'name': str(emp), 'count': len(emp_resolved), 'avg_days': avg_days})
-    perf.sort(key=lambda x: x['avg_days'])
+    report_rows = []
+    for r in rows.values():
+        avg = round(sum(r['resolved_days']) / len(r['resolved_days']), 1) if r['resolved_days'] else 0
+        report_rows.append({
+            'region': r['region'], 'emp': r['emp'], 'total': r['total'],
+            'abort': r['abort'], 'avg': avg, 'pending': r['pending'],
+            'b27': r['b27'], 'b715': r['b715'], 'b1530': r['b1530'],
+        })
+    report_rows.sort(key=lambda x: (x['region'], x['emp']))
 
     return render(request, 'core/reports.html', {
         'active_menu': 'reports',
-        'buckets': buckets,
-        'bucket_labels': json.dumps(list(buckets.keys())),
-        'bucket_values': json.dumps(list(buckets.values())),
-        'performance': perf,
-        'open_overdue': [c for c in open_complaints if c.days_open > 7],
+        'report_rows': report_rows,
+        'region_locked': (not _is_super(request.user)) and _user_region(request.user),
     })
+
+
+# ---------------------------------------------------------------- Change password
+@login_required
+def change_password(request):
+    form = PasswordChangeForm(request.user, request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)   # stay logged in
+        messages.success(request, 'Your password was changed successfully.')
+        return redirect('dashboard')
+    return render(request, 'core/change_password.html', {'form': form, 'active_menu': ''})

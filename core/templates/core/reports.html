@@ -1,97 +1,51 @@
 {% extends 'core/base.html' %}
-{% block title %}Reports | Newline CMS{% endblock %}
+{% block title %}Reports | Newline Complaint Management{% endblock %}
 {% block page_title %}Reports{% endblock %}
 {% block breadcrumb %}<li class="breadcrumb-item active">Reports</li>{% endblock %}
 
 {% block content %}
-
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header"><span class="card-title">Resolution Time by Day Buckets</span></div>
-      <div class="card-body"><canvas id="bucketChart" height="220"></canvas></div>
-    </div>
-  </div>
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-header"><span class="card-title">Resolution Summary</span></div>
-      <div class="card-body">
-        <table class="table table-bordered mb-0">
-          <thead><tr><th>Bucket</th><th>Resolved Complaints</th></tr></thead>
-          <tbody>
-            {% for label, count in buckets.items %}
-            <tr><td>{{ label }} days</td><td>{{ count }}</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="card">
-  <div class="card-header"><span class="card-title">Employee Performance</span></div>
+  <div class="card-header">
+    <span class="card-title">Call Record &amp; Pending Report{% if region_locked %} — {{ region_locked }}{% endif %}</span>
+  </div>
   <div class="card-body">
     <table class="table table-bordered table-hover dt-export">
-      <thead><tr><th>S.No</th><th>Employee</th><th>Resolved Count</th><th>Avg Days to Close</th></tr></thead>
+      <thead>
+        <tr>
+          <th rowspan="2">S.No</th>
+          <th rowspan="2">Region</th>
+          <th rowspan="2">Emp Name</th>
+          <th colspan="4" class="text-center">Call Record</th>
+          <th colspan="4" class="text-center">Pending Call</th>
+        </tr>
+        <tr>
+          <th>Total Calls</th><th>Abort</th><th>Avg</th><th>Pending</th>
+          <th>&gt;2&lt;7</th><th>&gt;7&lt;15</th><th>&gt;15&lt;30</th><th>Total Pending</th>
+        </tr>
+      </thead>
       <tbody>
-        {% for p in performance %}
+        {% for r in report_rows %}
         <tr>
           <td>{{ forloop.counter }}</td>
-          <td>{{ p.name }}</td>
-          <td>{{ p.count }}</td>
-          <td>
-            <span class="badge-days {% if p.avg_days <= 2 %}success{% elif p.avg_days <= 7 %}warning{% else %}danger{% endif %}">
-              {{ p.avg_days }} days
-            </span>
-          </td>
+          <td>{{ r.region }}</td>
+          <td>{{ r.emp }}</td>
+          <td>{{ r.total }}</td>
+          <td>{{ r.abort }}</td>
+          <td>{{ r.avg }}</td>
+          <td>{{ r.pending }}</td>
+          <td>{{ r.b27 }}</td>
+          <td>{{ r.b715 }}</td>
+          <td>{{ r.b1530 }}</td>
+          <td>{{ r.pending }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-center text-muted">No resolved complaints yet.</td></tr>
+        <tr><td colspan="11" class="text-center text-muted">No data yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>
+    <p class="text-muted mt-2 mb-0"><small>
+      <b>Avg</b> = average days to resolve · <b>&gt;2&lt;7 / &gt;7&lt;15 / &gt;15&lt;30</b> = pending calls open that many days
+    </small></p>
   </div>
 </div>
-
-<div class="card">
-  <div class="card-header"><span class="card-title">Open &amp; Overdue (&gt;7 days)</span></div>
-  <div class="card-body">
-    <table class="table table-bordered table-hover dt-export">
-      <thead><tr><th>S.No</th><th>Ticket No</th><th>Product</th><th>Customer</th><th>SPOC</th><th>Days Open</th></tr></thead>
-      <tbody>
-        {% for c in open_overdue %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ c.ticket_no }}</td>
-          <td>{{ c.product.name }}</td>
-          <td>{{ c.customer_name }}</td>
-          <td>{{ c.spoc|default:"-" }}</td>
-          <td><span class="badge-days danger">{{ c.days_open }} days</span></td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="6" class="text-center text-muted">Nothing overdue. 🎉</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-new Chart(document.getElementById('bucketChart'), {
-  type: 'bar',
-  data: {
-    labels: {{ bucket_labels|safe }},
-    datasets: [{
-      label: 'Resolved complaints',
-      data: {{ bucket_values|safe }},
-      backgroundColor: ['#1f8f4e','#7cc242','#C9A84C','#ef8c2b','#c62828']
-    }]
-  },
-  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks:{precision:0} } } }
-});
-</script>
 {% endblock %}

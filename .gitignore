@@ -15,6 +15,9 @@ env/
 # Collected static files (regenerated on the server)
 staticfiles/
 
+# Database — never track; the server keeps its own real data
+db.sqlite3
+
 # Secrets
 .env
 

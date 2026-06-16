@@ -50,6 +50,10 @@
           <td>{% if row.is_active %}<span class="status-pill status-resolved">Active</span>{% else %}<span class="status-pill status-closed">Inactive</span>{% endif %}</td>
           <td style="white-space:nowrap">
             <a href="{% url 'employee_edit' row.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
+            <a href="{% url 'employee_toggle' row.id %}" class="btn btn-sm {% if row.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %}"
+               title="{% if row.is_active %}Deactivate{% else %}Activate{% endif %}">
+              <i class="fas {% if row.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+            </a>
             <a href="{% url 'employee_delete' row.id %}" class="btn btn-sm btn-outline-danger"
                onclick="return confirm('Remove this user?')"><i class="fas fa-trash"></i></a>
           </td>

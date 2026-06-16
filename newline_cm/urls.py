@@ -14,11 +14,13 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 
     path('dashboard/', core_views.dashboard, name='dashboard'),
+    path('change-password/', core_views.change_password, name='change_password'),
 
     # Users / Employees
     path('employee/add/', core_views.employee_add, name='employee_add'),
     path('employee/', core_views.employee_list, name='employee_list'),
     path('employee/<int:pk>/edit/', core_views.employee_edit, name='employee_edit'),
+    path('employee/<int:pk>/toggle/', core_views.employee_toggle, name='employee_toggle'),
     path('employee/<int:pk>/delete/', core_views.employee_delete, name='employee_delete'),
 
     # User Roles
