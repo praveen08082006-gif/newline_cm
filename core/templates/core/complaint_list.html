@@ -61,8 +61,10 @@
           <td><span class="badge-days {{ row.days_color }}">{{ row.days_open }} day{{ row.days_open|pluralize }}</span></td>
           <td style="white-space:nowrap">
             <a href="{% url 'complaint_edit' row.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
+            {% if is_super %}
             <a href="{% url 'complaint_delete' row.id %}" class="btn btn-sm btn-outline-danger"
                onclick="return confirm('Delete this complaint?')"><i class="fas fa-trash"></i></a>
+            {% endif %}
           </td>
         </tr>
         {% empty %}

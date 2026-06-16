@@ -16,11 +16,17 @@
           {% for e in form.employee_name.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
         </div>
         <div class="col-md-6 form-group">
+          <label>Username <span class="text-required">*</span></label>
+          {{ form.username }}
+          <small class="text-muted">Used to log in</small>
+          {% for e in form.username.errors %}<small class="text-danger d-block">{{ e }}</small>{% endfor %}
+        </div>
+        <div class="col-md-6 form-group">
           <label>User Type</label>
           {{ form.user_type }}
         </div>
         <div class="col-md-6 form-group">
-          <label>Region</label>
+          <label>Region <span class="text-required">*</span></label>
           {{ form.region }}
         </div>
         <div class="col-md-6 form-group">
@@ -30,7 +36,8 @@
         <div class="col-md-6 form-group">
           <label>Official Email ID <span class="text-required">*</span></label>
           {{ form.email }}
-          {% for e in form.email.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
+          <small class="text-muted">Used for password reset</small>
+          {% for e in form.email.errors %}<small class="text-danger d-block">{{ e }}</small>{% endfor %}
         </div>
         <div class="col-md-6 form-group">
           <label>User Role</label>
@@ -40,6 +47,10 @@
           <label>Password {% if not editing %}<span class="text-required">*</span>{% endif %}</label>
           {{ form.password }}
           <small class="text-muted">{{ form.password.help_text }}</small>
+        </div>
+        <div class="col-md-6 form-group">
+          <label class="d-block">Account Status</label>
+          <label class="mt-2">{{ form.is_active }} <span class="ml-1">Active (can log in)</span></label>
         </div>
       </div>
       <div class="text-right"><button type="submit" class="btn btn-primary px-4">Submit</button></div>

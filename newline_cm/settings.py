@@ -134,3 +134,21 @@ STATICFILES_DIRS = [BASE_DIR / 'core/static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+
+# Auto logout after 1 hour of inactivity
+SESSION_COOKIE_AGE = 60 * 60
+SESSION_SAVE_EVERY_REQUEST = True
+
+# ---- Email (password reset) ----
+# Console backend prints the reset email (with the link) to the server log so it
+# works out of the box. To send REAL emails, switch to the SMTP block below and
+# fill in your Gmail address + App Password.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'Newline CMS <no-reply@newlineinteractive.in>'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-gmail@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your-16-char-app-password'

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import User
 
 from .models import Complaint, Employee, FAQ, Product, Series, UserRole
 
@@ -49,16 +50,18 @@ class UserRoleForm(forms.ModelForm):
 class EmployeeForm(forms.ModelForm):
     """Add/Edit Employee — also creates/updates the underlying login User."""
     employee_name = forms.CharField(label='Employee Name', max_length=150)
-    email = forms.EmailField(label='Official Email ID')
+    username = forms.CharField(label='Username', max_length=150, help_text='Used to log in')
+    email = forms.EmailField(label='Official Email ID', help_text='Used for password reset')
     password = forms.CharField(
         label='Password', required=False, widget=forms.PasswordInput(render_value=False),
         help_text='On add: leave blank for default "Newline@123". On edit: leave blank to keep current.')
 
     class Meta:
         model = Employee
-        fields = ['user_type', 'region', 'contact_no', 'role']
+        fields = ['user_type', 'region', 'contact_no', 'role', 'is_active']
 
-    field_order = ['employee_name', 'user_type', 'region', 'contact_no', 'email', 'role', 'password']
+    field_order = ['employee_name', 'username', 'user_type', 'region', 'contact_no',
+                   'email', 'role', 'password', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -66,10 +69,20 @@ class EmployeeForm(forms.ModelForm):
         self.fields['region'].widget.choices = [('', 'Select Region')] + list(self.fields['region'].choices)[1:]
         _style(self.fields, {
             'employee_name': 'Enter Employee Name',
+            'username': 'Login username',
             'contact_no': 'Enter Mobile No',
             'email': 'Enter Official Email ID',
             'password': 'Set / reset password',
         })
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        qs = User.objects.filter(username=username)
+        if self.instance and self.instance.pk and self.instance.user_id:
+            qs = qs.exclude(pk=self.instance.user_id)
+        if qs.exists():
+            raise forms.ValidationError('That username is already taken.')
+        return username
 
 
 class ComplaintForm(forms.ModelForm):

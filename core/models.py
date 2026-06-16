@@ -9,7 +9,6 @@ REGION_CHOICES = [
     ('East India', 'East India'),
     ('West India', 'West India'),
     ('South India', 'South India'),
-    ('Middle East', 'Middle East'),
 ]
 
 # Statuses that count as a complaint being resolved/closed (stops the day-clock)

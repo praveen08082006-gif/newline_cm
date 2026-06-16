@@ -128,23 +128,23 @@
             </ul>
           </li>
 
-          {% if is_super %}
           <li class="nav-item {% if active_menu == 'faq' %}menu-open{% endif %}">
             <a href="#" class="nav-link {% if active_menu == 'faq' %}active{% endif %}">
-              <i class="nav-icon fas fa-question-circle"></i><p>FAQ Management<i class="right fas fa-angle-left"></i></p>
+              <i class="nav-icon fas fa-question-circle"></i><p>FAQ{% if is_super %} Management{% endif %}<i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item"><a href="{% url 'faq_add' %}" class="nav-link"><p>Add FAQ</p></a></li>
               <li class="nav-item"><a href="{% url 'faq_list' %}" class="nav-link"><p>FAQ List</p></a></li>
             </ul>
           </li>
-          {% endif %}
 
+          {% if is_privileged %}
           <li class="nav-item">
             <a href="{% url 'reports' %}" class="nav-link {% if active_menu == 'reports' %}active{% endif %}">
               <i class="nav-icon fas fa-chart-bar"></i><p>Reports</p>
             </a>
           </li>
+          {% endif %}
 
         </ul>
       </nav>

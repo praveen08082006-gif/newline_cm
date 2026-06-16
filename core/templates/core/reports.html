@@ -6,7 +6,7 @@
 {% block content %}
 <div class="card">
   <div class="card-header">
-    <span class="card-title">Call Record &amp; Pending Report{% if region_locked %} — {{ region_locked }}{% endif %}</span>
+    <span class="card-title">Call Record &amp; Pending Call Report{% if region_locked %} — {{ region_locked }}{% endif %}</span>
   </div>
   <div class="card-body">
     <table class="table table-bordered table-hover dt-export">
@@ -16,11 +16,11 @@
           <th rowspan="2">Region</th>
           <th rowspan="2">Emp Name</th>
           <th colspan="4" class="text-center">Call Record</th>
-          <th colspan="4" class="text-center">Pending Call</th>
+          <th colspan="3" class="text-center">Pending Call</th>
         </tr>
         <tr>
-          <th>Total Calls</th><th>Abort</th><th>Avg</th><th>Pending</th>
-          <th>&gt;2&lt;7</th><th>&gt;7&lt;15</th><th>&gt;15&lt;30</th><th>Total Pending</th>
+          <th>Total Calls</th><th>Abort</th><th>Avg (days)</th><th>Pending</th>
+          <th>&gt;2&lt;7</th><th>&gt;7&lt;15</th><th>&gt;15&lt;30</th>
         </tr>
       </thead>
       <tbody>
@@ -36,15 +36,14 @@
           <td>{{ r.b27 }}</td>
           <td>{{ r.b715 }}</td>
           <td>{{ r.b1530 }}</td>
-          <td>{{ r.pending }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="11" class="text-center text-muted">No data yet.</td></tr>
+        <tr><td colspan="10" class="text-center text-muted">No complaint data yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>
     <p class="text-muted mt-2 mb-0"><small>
-      <b>Avg</b> = average days to resolve · <b>&gt;2&lt;7 / &gt;7&lt;15 / &gt;15&lt;30</b> = pending calls open that many days
+      <b>Avg</b> = average days to resolve &nbsp;·&nbsp; <b>Pending</b> day buckets count how long open calls have waited.
     </small></p>
   </div>
 </div>

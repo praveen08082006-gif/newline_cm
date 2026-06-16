@@ -53,6 +53,8 @@ def scope_complaints(user):
 
 # super-admin-only views (user/role/series/product management)
 super_admin_required = user_passes_test(_is_super, login_url='dashboard')
+# super admin + regional admin (not employees) — e.g. Reports
+privileged_required = user_passes_test(_is_privileged, login_url='dashboard')
 
 
 # ---------------------------------------------------------------- Dashboard
@@ -208,14 +210,9 @@ def employee_add(request):
     form = EmployeeForm(request.POST or None)
     if form.is_valid():
         name = form.cleaned_data['employee_name']
+        username = form.cleaned_data['username']
         email = form.cleaned_data['email']
         password = form.cleaned_data.get('password') or 'Newline@123'
-        # build a login user from the email (username = part before @)
-        username = email.split('@')[0]
-        base, n = username, 1
-        while User.objects.filter(username=username).exists():
-            username = f'{base}{n}'
-            n += 1
         parts = name.split(' ', 1)
         user = User.objects.create_user(
             username=username, email=email, password=password,
@@ -224,7 +221,9 @@ def employee_add(request):
         emp = form.save(commit=False)
         emp.user = user
         emp.save()
-        messages.success(request, f'Employee "{name}" added (login: {username}).')
+        user.is_active = emp.is_active
+        user.save(update_fields=['is_active'])
+        messages.success(request, f'Employee "{name}" added. They can log in with username "{username}".')
         return redirect('employee_list')
     return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users'})
 
@@ -246,20 +245,22 @@ def employee_toggle(request, pk):
 def employee_edit(request, pk):
     emp = get_object_or_404(Employee, pk=pk)
     initial = {'employee_name': emp.user.get_full_name() or emp.user.username,
-               'email': emp.user.email}
+               'username': emp.user.username, 'email': emp.user.email}
     form = EmployeeForm(request.POST or None, instance=emp, initial=initial)
     if form.is_valid():
         emp = form.save()
-        # keep the linked login user's name + email in sync
+        # keep the linked login user in sync
         name = form.cleaned_data['employee_name']
         parts = name.split(' ', 1)
-        emp.user.first_name = parts[0]
-        emp.user.last_name = parts[1] if len(parts) > 1 else ''
-        emp.user.email = form.cleaned_data['email']
-        new_password = form.cleaned_data.get('password')
-        if new_password:
-            emp.user.set_password(new_password)   # super admin can reset any user's password
-        emp.user.save()
+        u = emp.user
+        u.first_name = parts[0]
+        u.last_name = parts[1] if len(parts) > 1 else ''
+        u.username = form.cleaned_data['username']
+        u.email = form.cleaned_data['email']
+        if form.cleaned_data.get('password'):
+            u.set_password(form.cleaned_data['password'])   # super admin can reset any password
+        u.is_active = emp.is_active
+        u.save()
         messages.success(request, f'Employee "{name}" updated.')
         return redirect('employee_list')
     return render(request, 'core/employee_form.html', {'form': form, 'active_menu': 'users', 'editing': emp})
@@ -300,6 +301,8 @@ def complaint_add(request):
     if form.is_valid():
         complaint = form.save(commit=False)
         complaint.created_by = request.user
+        if not _is_super(request.user) and _user_region(request.user):
+            complaint.region = _user_region(request.user)   # lock to own region
         complaint.save()
         messages.success(request, f'Complaint {complaint.ticket_no} registered.')
         return redirect('complaint_list')
@@ -334,17 +337,21 @@ def complaint_list(request):
 
 @login_required
 def complaint_edit(request, pk):
-    complaint = get_object_or_404(Complaint, pk=pk)
+    # scoped: a regional admin/employee can only open complaints in their region
+    complaint = get_object_or_404(scope_complaints(request.user), pk=pk)
     form = ComplaintForm(request.POST or None, instance=complaint)
     if form.is_valid():
-        form.save()
+        obj = form.save(commit=False)
+        if not _is_super(request.user) and _user_region(request.user):
+            obj.region = _user_region(request.user)
+        obj.save()
         messages.success(request, f'Complaint {complaint.ticket_no} updated.')
         return redirect('complaint_list')
     return render(request, 'core/complaint_form.html',
                   {'form': form, 'active_menu': 'complaint', 'editing': complaint})
 
 
-@login_required
+@super_admin_required
 def complaint_delete(request, pk):
     get_object_or_404(Complaint, pk=pk).delete()
     messages.success(request, 'Complaint deleted.')
@@ -352,7 +359,7 @@ def complaint_delete(request, pk):
 
 
 # ---------------------------------------------------------------- FAQ
-@super_admin_required
+@login_required
 def faq_add(request):
     form = FAQForm(request.POST or None)
     if form.is_valid():
@@ -362,7 +369,7 @@ def faq_add(request):
     return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq'})
 
 
-@super_admin_required
+@login_required
 def faq_edit(request, pk):
     obj = get_object_or_404(FAQ, pk=pk)
     form = FAQForm(request.POST or None, instance=obj)
@@ -373,13 +380,13 @@ def faq_edit(request, pk):
     return render(request, 'core/faq_form.html', {'form': form, 'active_menu': 'faq', 'editing': obj})
 
 
-@super_admin_required
+@login_required
 def faq_list(request):
     return render(request, 'core/faq_list.html',
                   {'rows': FAQ.objects.all(), 'active_menu': 'faq'})
 
 
-@super_admin_required
+@login_required
 def faq_delete(request, pk):
     get_object_or_404(FAQ, pk=pk).delete()
     messages.success(request, 'FAQ deleted.')
@@ -387,7 +394,7 @@ def faq_delete(request, pk):
 
 
 # ---------------------------------------------------------------- Reports
-@login_required
+@privileged_required
 def reports(request):
     """Per-employee call record: total calls, abort, avg days, pending + day buckets.
     Super admin sees all regions; normal admin only their region."""
