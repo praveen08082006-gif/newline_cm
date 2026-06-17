@@ -93,15 +93,21 @@ document.addEventListener('DOMContentLoaded', function () {
   el.addEventListener('dblclick', function () {
     fitted = !fitted;
     if (fitted) {
-      var ratio = el.clientWidth / el.scrollWidth;
+      el.scrollLeft = 0;
+      var fullW = el.scrollWidth;
+      var visW  = el.clientWidth;
+      if (fullW <= visW) { fitted = false; return; }
+      var ratio = visW / fullW;
       el.style.transformOrigin = 'top left';
       el.style.transform = 'scale(' + ratio + ')';
       el.style.height = (el.scrollHeight * ratio) + 'px';
       el.style.overflow = 'hidden';
+      el.parentElement.style.overflow = 'hidden';
     } else {
       el.style.transform = '';
       el.style.height = '';
       el.style.overflow = '';
+      el.parentElement.style.overflow = '';
     }
   });
 });
