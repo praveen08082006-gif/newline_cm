@@ -69,56 +69,24 @@
 
 {% block extra_js %}
 <script>
-(function () {
-  document.addEventListener('DOMContentLoaded', function () {
-    initTableInteract(document.querySelector('.dataTables_wrapper'));
-  });
-
-  function initTableInteract(el) {
-    if (!el) return;
-    var isDown = false, startX, scrollLeft, didDrag = false;
-    el.addEventListener('mousedown', function (e) {
-      isDown = true; didDrag = false; el.classList.add('dragging');
-      startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft;
-    });
-    el.addEventListener('mouseleave', function () { isDown = false; el.classList.remove('dragging'); });
-    el.addEventListener('mouseup',    function () { isDown = false; el.classList.remove('dragging'); });
-    el.addEventListener('mousemove',  function (e) {
-      if (!isDown) return;
-      e.preventDefault(); didDrag = true;
-      el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
-    });
-    var touchStartX, touchScrollLeft;
-    el.addEventListener('touchstart', function (e) {
-      touchStartX = e.touches[0].pageX; touchScrollLeft = el.scrollLeft;
-    }, { passive: true });
-    el.addEventListener('touchmove', function (e) {
-      el.scrollLeft = touchScrollLeft - (e.touches[0].pageX - touchStartX);
-    }, { passive: true });
-    var fitted = false, lastTap = 0;
-    function toggleFit() {
-      fitted = !fitted;
-      if (fitted) {
-        var ratio = el.clientWidth / el.scrollWidth;
-        el.style.transformOrigin = 'top left';
-        el.style.transform = 'scale(' + ratio + ')';
-        el.style.height = (el.scrollHeight * ratio) + 'px';
-        el.style.overflow = 'hidden';
-        el.style.cursor = 'zoom-in';
-      } else {
-        el.style.transform = '';
-        el.style.height = '';
-        el.style.overflow = '';
-        el.style.cursor = 'grab';
-      }
+document.addEventListener('DOMContentLoaded', function () {
+  var el = document.querySelector('.dataTables_wrapper');
+  if (!el) return;
+  var fitted = false;
+  el.addEventListener('dblclick', function () {
+    fitted = !fitted;
+    if (fitted) {
+      var ratio = el.clientWidth / el.scrollWidth;
+      el.style.transformOrigin = 'top left';
+      el.style.transform = 'scale(' + ratio + ')';
+      el.style.height = (el.scrollHeight * ratio) + 'px';
+      el.style.overflow = 'hidden';
+    } else {
+      el.style.transform = '';
+      el.style.height = '';
+      el.style.overflow = '';
     }
-    el.addEventListener('dblclick', function (e) { if (!didDrag) toggleFit(); });
-    el.addEventListener('touchend', function (e) {
-      var now = Date.now();
-      if (now - lastTap < 350) { e.preventDefault(); toggleFit(); }
-      lastTap = now;
-    });
-  }
-})();
+  });
+});
 </script>
 {% endblock %}
