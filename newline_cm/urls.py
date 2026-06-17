@@ -58,6 +58,7 @@ urlpatterns = [
     # Complaint
     path('complaint/add/', core_views.complaint_add, name='complaint_add'),
     path('complaint/', core_views.complaint_list, name='complaint_list'),
+    path('complaint/<int:pk>/', core_views.complaint_detail, name='complaint_detail'),
     path('complaint/<int:pk>/edit/', core_views.complaint_edit, name='complaint_edit'),
     path('complaint/<int:pk>/delete/', core_views.complaint_delete, name='complaint_delete'),
 

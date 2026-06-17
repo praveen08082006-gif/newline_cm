@@ -297,7 +297,8 @@ def employee_delete(request, pk):
 # ---------------------------------------------------------------- Complaints
 @login_required
 def complaint_add(request):
-    form = ComplaintForm(request.POST or None)
+    spoc_region = None if _is_super(request.user) else _user_region(request.user)
+    form = ComplaintForm(request.POST or None, spoc_region=spoc_region)
     if form.is_valid():
         complaint = form.save(commit=False)
         complaint.created_by = request.user
@@ -336,10 +337,18 @@ def complaint_list(request):
 
 
 @login_required
+def complaint_detail(request, pk):
+    # scoped: region-locked users can only view their region's complaints
+    complaint = get_object_or_404(scope_complaints(request.user), pk=pk)
+    return render(request, 'core/complaint_detail.html', {'c': complaint, 'active_menu': 'complaint'})
+
+
+@login_required
 def complaint_edit(request, pk):
     # scoped: a regional admin/employee can only open complaints in their region
     complaint = get_object_or_404(scope_complaints(request.user), pk=pk)
-    form = ComplaintForm(request.POST or None, instance=complaint)
+    spoc_region = None if _is_super(request.user) else _user_region(request.user)
+    form = ComplaintForm(request.POST or None, instance=complaint, spoc_region=spoc_region)
     if form.is_valid():
         obj = form.save(commit=False)
         if not _is_super(request.user) and _user_region(request.user):

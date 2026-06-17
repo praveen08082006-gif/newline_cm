@@ -44,8 +44,8 @@
     <table class="table table-bordered table-hover dt-export">
       <thead>
         <tr>
-          <th>S.No</th><th>Ticket No</th><th>Model</th><th>Customer</th><th>SPOC</th>
-          <th>Region</th><th>Status</th><th>Days Open</th><th>Action</th>
+          <th>S.No</th><th>Ticket No</th><th>Model</th><th>Customer Name / No</th><th>SPOC</th>
+          <th>Distributor / Partner</th><th>Mobile</th><th>Region</th><th>Status</th><th>Days Open</th><th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -56,19 +56,22 @@
           <td>{{ row.product.name }}</td>
           <td>{{ row.customer_name }}<br><small class="text-muted">{{ row.customer_mobile }}</small></td>
           <td>{{ row.spoc|default:"-" }}</td>
+          <td>{{ row.distributor_partner|default:"-" }}</td>
+          <td>{{ row.distributor_mobile|default:"-" }}</td>
           <td>{{ row.region }}</td>
           <td><span class="status-pill status-{{ row.status|lower|cut:' ' }}">{{ row.status }}</span></td>
           <td><span class="badge-days {{ row.days_color }}">{{ row.days_open }} day{{ row.days_open|pluralize }}</span></td>
           <td style="white-space:nowrap">
-            <a href="{% url 'complaint_edit' row.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen"></i></a>
+            <a href="{% url 'complaint_detail' row.id %}" class="btn btn-sm btn-outline-secondary" title="View"><i class="fas fa-eye"></i></a>
+            <a href="{% url 'complaint_edit' row.id %}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fas fa-pen"></i></a>
             {% if is_super %}
-            <a href="{% url 'complaint_delete' row.id %}" class="btn btn-sm btn-outline-danger"
+            <a href="{% url 'complaint_delete' row.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
                onclick="return confirm('Delete this complaint?')"><i class="fas fa-trash"></i></a>
             {% endif %}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="9" class="text-center text-muted">No complaints yet.</td></tr>
+        <tr><td colspan="11" class="text-center text-muted">No complaints yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>

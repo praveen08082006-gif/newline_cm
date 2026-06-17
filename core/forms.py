@@ -89,7 +89,7 @@ class ComplaintForm(forms.ModelForm):
     class Meta:
         model = Complaint
         fields = [
-            'registration_date', 'product', 'customer_name', 'customer_mobile', 'customer_email',
+            'registration_date', 'product', 'serial_number', 'customer_name', 'customer_mobile', 'customer_email',
             'complaint_type', 'spoc', 'distributor_partner', 'distributor_mobile',
             'region', 'state', 'district', 'pincode', 'country', 'call',
             'status', 'description',
@@ -99,11 +99,17 @@ class ComplaintForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, spoc_region=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['product'].empty_label = 'Select Product'
         self.fields['spoc'].empty_label = 'Select SPOC'
+        # SPOC dropdown shows only members of the relevant region (region-locked users)
+        if spoc_region:
+            self.fields['spoc'].queryset = Employee.objects.select_related('user').filter(region=spoc_region)
+        else:
+            self.fields['spoc'].queryset = Employee.objects.select_related('user').all()
         _style(self.fields, {
+            'serial_number': 'Enter Serial Number',
             'customer_name': 'Enter Customer Name',
             'customer_mobile': 'Enter Contact Number',
             'customer_email': 'Enter Email',

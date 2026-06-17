@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+{% block title %}View Complaint | Newline Complaint Management{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item"><a href="{% url 'complaint_list' %}">Complaint</a></li><li class="breadcrumb-item active">View</li>{% endblock %}
+
+{% block content %}
+<a href="{% url 'complaint_list' %}" class="btn btn-primary mb-3"><i class="fas fa-arrow-left mr-1"></i>Back</a>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">View Complaint — ( {{ c.ticket_no }} )</span></div>
+  <div class="card-body">
+    <div class="row">
+      {# left column #}
+      <div class="col-md-6">
+        <p><b>Model :</b> {{ c.product.name }}</p>
+        <p><b>Region :</b> {{ c.region }}</p>
+        <p><b>Customer No :</b> {{ c.customer_mobile }}</p>
+        <p><b>Distributer / Partner Contact Number :</b> {{ c.distributor_mobile|default:"-" }}</p>
+        <p><b>Complaint Type :</b> {{ c.complaint_type|default:"-" }}</p>
+        <p><b>Complaint :</b> {{ c.description|default:"-" }}</p>
+      </div>
+      {# right column #}
+      <div class="col-md-6">
+        <p><b>Serial Number :</b> {{ c.serial_number|default:"-" }}</p>
+        <p><b>Customer Name :</b> {{ c.customer_name }}</p>
+        <p><b>Email :</b> {{ c.customer_email|default:"-" }}</p>
+        <p><b>Distributer / Partner :</b> {{ c.distributor_partner|default:"-" }}</p>
+        <p><b>SPOC :</b> {{ c.spoc|default:"-" }}</p>
+        <p><b>Status :</b> <span class="status-pill status-{{ c.status|lower|cut:' ' }}">{{ c.status }}</span></p>
+      </div>
+    </div>
+
+    {% if c.state or c.district or c.pincode or c.country %}
+    <div class="row mt-2">
+      <div class="col-md-3"><p><b>State :</b> {{ c.state|default:"-" }}</p></div>
+      <div class="col-md-3"><p><b>District :</b> {{ c.district|default:"-" }}</p></div>
+      <div class="col-md-3"><p><b>Pincode :</b> {{ c.pincode|default:"-" }}</p></div>
+      <div class="col-md-3"><p><b>Country :</b> {{ c.country|default:"-" }}</p></div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">History</span></div>
+  <div class="card-body">
+    <table class="table table-bordered mb-0">
+      <tr><th style="width:40%">Registration Date</th><td>{{ c.registration_date }}</td></tr>
+      <tr><th>Days Open</th><td><span class="badge-days {{ c.days_color }}">{{ c.days_open }} day{{ c.days_open|pluralize }}</span></td></tr>
+      <tr><th>Closed Date</th><td>{% if c.closed_date %}{{ c.closed_date }}{% else %}<span class="text-muted">Not closed yet</span>{% endif %}</td></tr>
+      <tr><th>Current Status</th><td><span class="status-pill status-{{ c.status|lower|cut:' ' }}">{{ c.status }}</span></td></tr>
+      <tr><th>Created</th><td>{{ c.created_at }}</td></tr>
+      <tr><th>Last Updated</th><td>{{ c.updated_at }}</td></tr>
+    </table>
+  </div>
+</div>
+{% endblock %}

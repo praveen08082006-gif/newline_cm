@@ -88,6 +88,7 @@ class Complaint(models.Model):
 
     ticket_no = models.CharField(max_length=40, unique=True, blank=True, db_index=True)
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='complaints')
+    serial_number = models.CharField(max_length=100, blank=True)
     customer_name = models.CharField(max_length=200)
     customer_mobile = models.CharField(max_length=15)
     customer_email = models.EmailField(blank=True)
