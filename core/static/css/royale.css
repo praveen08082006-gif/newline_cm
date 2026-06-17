@@ -209,8 +209,10 @@ label { font-weight: 600; color: #3a455c; margin-bottom: 7px; }
 .status-notrespondedcalls { background: #fde6e6; color: #c43d3d; }
 .status-closed     { background: #eef0f4; color: var(--muted); }
 
-/* ---------- DataTables (mobile scroll) ---------- */
-.dataTables_wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* ---------- DataTables (mobile scroll + full width) ---------- */
+.dataTables_wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; cursor: grab; }
+.dataTables_wrapper.dragging { cursor: grabbing; user-select: none; }
+table.dataTable { width: 100% !important; }
 .dt-buttons .btn { margin-right: 6px; background: #fff; color: var(--charcoal); border: 1px solid var(--line); font-weight: 500; font-size: .82rem; border-radius: 8px; }
 .dt-buttons .btn:hover { background: var(--page-bg); transform: translateY(-1px); }
 .dataTables_filter input { border-radius: 8px; border: 1px solid var(--line); padding: 7px 12px; }

@@ -83,3 +83,35 @@
   </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    var el = document.querySelector('.dataTables_wrapper');
+    if (!el) return;
+    var isDown = false, startX, scrollLeft;
+    el.addEventListener('mousedown', function (e) {
+      isDown = true; el.classList.add('dragging');
+      startX = e.pageX - el.offsetLeft;
+      scrollLeft = el.scrollLeft;
+    });
+    el.addEventListener('mouseleave', function () { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mouseup', function () { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mousemove', function (e) {
+      if (!isDown) return;
+      e.preventDefault();
+      el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
+    });
+    var touchStartX, touchScrollLeft;
+    el.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].pageX;
+      touchScrollLeft = el.scrollLeft;
+    }, { passive: true });
+    el.addEventListener('touchmove', function (e) {
+      el.scrollLeft = touchScrollLeft - (e.touches[0].pageX - touchStartX);
+    }, { passive: true });
+  });
+})();
+</script>
+{% endblock %}
