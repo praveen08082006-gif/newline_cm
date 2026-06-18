@@ -127,7 +127,7 @@ th, .dataTables_info, .dataTables_filter, .page-link, .dt-buttons .btn, .stat-ca
 /* ---------- Dashboard stat cards ---------- */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 20px; margin-bottom: 26px; }
 .stat-card {
-  position: relative; overflow: hidden; border-radius: var(--radius);
+  position: relative; border-radius: var(--radius);
   padding: 22px 24px; color: #fff; isolation: isolate;
   box-shadow: 0 14px 34px rgba(15,27,60,.18);
   animation: fadeUp .55s ease both; transition: transform var(--t), box-shadow var(--t);
@@ -145,6 +145,25 @@ th, .dataTables_info, .dataTables_filter, .page-link, .dt-buttons .btn, .stat-ca
 .stat-3 { background: linear-gradient(135deg, #a67f1d, #8B6914); }   /* dark amber */
 .stat-4 { background: linear-gradient(135deg, #4d6188, #3D4F6F); }   /* slate      */
 .stat-card:nth-child(2){ animation-delay:.06s; } .stat-card:nth-child(3){ animation-delay:.12s; } .stat-card:nth-child(4){ animation-delay:.18s; }
+
+/* stat card tooltip */
+.stat-card[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 10px); left: 50%;
+  transform: translateX(-50%) scale(.95); opacity: 0;
+  background: rgba(15,27,60,.92); color: #fff;
+  padding: 8px 14px; border-radius: 8px; font-size: .78rem;
+  white-space: nowrap; pointer-events: none; z-index: 200;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.stat-card[data-tip]::before {
+  content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%;
+  transform: translateX(-50%); border: 6px solid transparent;
+  border-top-color: rgba(15,27,60,.92); opacity: 0; pointer-events: none; z-index: 200;
+  transition: opacity .18s ease;
+}
+.stat-card[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
+.stat-card[data-tip]:hover::before { opacity: 1; }
 
 .section-title { display: inline-block; padding-bottom: 8px; margin-bottom: 22px; font-size: 1.5rem;
   border-bottom: 3px solid; border-image: linear-gradient(90deg,var(--gold),var(--gold-2)) 1; }

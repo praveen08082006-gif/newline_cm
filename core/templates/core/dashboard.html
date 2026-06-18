@@ -11,22 +11,22 @@
 
 <!-- Stat cards -->
 <div class="stat-grid">
-  <div class="stat-card stat-1">
+  <div class="stat-card stat-1" data-tip="Resolved: {{ resolved_count }}  ·  Pending: {{ pending_count }}">
     <div class="stat-label">Total Complaints</div>
     <div class="stat-value">{{ total }}</div>
     <i class="fas fa-clipboard-list stat-icon"></i>
   </div>
-  <div class="stat-card stat-2">
+  <div class="stat-card stat-2" data-tip="Resolved out of {{ total }} total complaints">
     <div class="stat-label">Resolved</div>
     <div class="stat-value">{{ resolved_count }}</div>
     <i class="fas fa-circle-check stat-icon"></i>
   </div>
-  <div class="stat-card stat-3">
+  <div class="stat-card stat-3" data-tip="Overdue (>7 days): {{ overdue_count }}  ·  On track: {{ pending_count|add:-overdue_count }}">
     <div class="stat-label">Pending</div>
     <div class="stat-value">{{ pending_count }}</div>
     <i class="fas fa-hourglass-half stat-icon"></i>
   </div>
-  <div class="stat-card stat-4">
+  <div class="stat-card stat-4" data-tip="Based on {{ resolved_count }} resolved complaints">
     <div class="stat-label">Avg Days to Resolve</div>
     <div class="stat-value">{{ avg_days }}</div>
     <i class="fas fa-stopwatch stat-icon"></i>
