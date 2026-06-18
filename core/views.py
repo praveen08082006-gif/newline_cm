@@ -79,13 +79,17 @@ def dashboard(request):
     resolved_list = list(resolved_qs)
     avg_days = round(sum(c.days_open for c in resolved_list) / len(resolved_list), 1) if resolved_list else 0
 
+    open_count = open_qs.count()
+    overdue_count = sum(1 for c in open_qs if c.days_open > 7)
+
     context = {
         'active_menu': 'dashboard',
         'total': qs.count(),
-        'open_count': open_qs.count(),
-        'pending_count': open_qs.count(),
+        'open_count': open_count,
+        'pending_count': open_count,
         'resolved_count': resolved_qs.count(),
-        'overdue_count': sum(1 for c in open_qs if c.days_open > 7),
+        'overdue_count': overdue_count,
+        'ontrack_count': open_count - overdue_count,
         'avg_days': avg_days,
         'product_labels': json.dumps([p['product__name'] or 'Unknown' for p in product_data]),
         'product_values': json.dumps([p['c'] for p in product_data]),

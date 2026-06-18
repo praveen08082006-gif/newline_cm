@@ -21,7 +21,7 @@
     <div class="stat-value">{{ resolved_count }}</div>
     <i class="fas fa-circle-check stat-icon"></i>
   </div>
-  <div class="stat-card stat-3" data-tip="Overdue (>7 days): {{ overdue_count }}  ·  On track: {{ pending_count|add:-overdue_count }}">
+  <div class="stat-card stat-3" data-tip="Overdue (>7 days): {{ overdue_count }}  ·  On track: {{ ontrack_count }}">
     <div class="stat-label">Pending</div>
     <div class="stat-value">{{ pending_count }}</div>
     <i class="fas fa-hourglass-half stat-icon"></i>
