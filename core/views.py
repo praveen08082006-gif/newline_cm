@@ -6,6 +6,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count
@@ -49,6 +51,13 @@ def scope_complaints(user):
     if region:
         return qs.filter(region=region)
     return qs.filter(created_by=user)   # no region assigned -> only own
+
+
+# Show the newline splash once, right after a successful login.
+@receiver(user_logged_in)
+def _show_splash_on_login(sender, request, user, **kwargs):
+    if request is not None:
+        request.session['show_splash'] = True
 
 
 # super-admin-only views (user/role/series/product management)
@@ -99,6 +108,7 @@ def dashboard(request):
         'date_from': date_from or '',
         'date_to': date_to or '',
         'region_locked': (not _is_super(request.user)) and _user_region(request.user),
+        'show_splash': request.session.pop('show_splash', False),
     }
     return render(request, 'core/dashboard.html', context)
 

@@ -4,6 +4,39 @@
    Visual only — functionality untouched.
    ===================================================================== */
 
+/* ---------- Login splash (newline preloader) ---------- */
+#nl-splash {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(120% 120% at 50% 40%, #ffffff 0%, #f3f7fc 100%);
+  animation: nlSplashOut .6s ease 2.05s forwards;
+}
+#nl-splash .nl-word {
+  font-family: 'Comfortaa', sans-serif; font-weight: 700;
+  font-size: clamp(2.6rem, 8vw, 4.4rem); letter-spacing: .5px;
+  color: #1C75BC;
+  opacity: 0; transform: translateY(14px) scale(.94);
+  animation: nlWordIn .85s cubic-bezier(.2,.75,.2,1) .12s forwards;
+}
+#nl-splash .nl-bar {
+  margin-top: 30px; width: 190px; height: 3px; border-radius: 3px;
+  background: #e2ecf7; overflow: hidden;
+  opacity: 0; animation: nlFadeIn .5s ease .5s forwards;
+}
+#nl-splash .nl-bar span {
+  display: block; height: 100%; width: 35%; border-radius: 3px;
+  background: linear-gradient(90deg, #1C75BC, #5cb0f0);
+  animation: nlBar 1.3s ease-in-out infinite;
+}
+@keyframes nlWordIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes nlFadeIn { to { opacity: 1; } }
+@keyframes nlBar {
+  0%   { transform: translateX(-130%); }
+  100% { transform: translateX(420%); }
+}
+@keyframes nlSplashOut { to { opacity: 0; visibility: hidden; } }
+body.nl-splashing { overflow: hidden; }
+
 :root {
   --navy:       #0F1B3C;
   --navy-2:     #15244d;

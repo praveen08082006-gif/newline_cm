@@ -6,6 +6,21 @@
 
 {% block content %}
 
+{% if show_splash %}
+<div id="nl-splash" aria-hidden="true">
+  <div class="nl-word">newline</div>
+  <div class="nl-bar"><span></span></div>
+</div>
+<script>
+  document.body.classList.add('nl-splashing');
+  setTimeout(function () {
+    var s = document.getElementById('nl-splash');
+    if (s) s.parentNode.removeChild(s);
+    document.body.classList.remove('nl-splashing');
+  }, 2700);
+</script>
+{% endif %}
+
 <!-- Brand banner -->
 <div class="brand-banner">{% include 'core/_logo.html' %}</div>
 
