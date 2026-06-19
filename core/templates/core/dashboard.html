@@ -8,8 +8,7 @@
 
 {% if show_splash %}
 <div id="nl-splash" aria-hidden="true">
-  <div class="nl-word">newline</div>
-  <div class="nl-bar"><span></span></div>
+  <img src="{% static 'img/newline-logo-blue.png' %}" class="nl-logo" alt="newline">
 </div>
 <script>
   document.body.classList.add('nl-splashing');
@@ -17,7 +16,7 @@
     var s = document.getElementById('nl-splash');
     if (s) s.parentNode.removeChild(s);
     document.body.classList.remove('nl-splashing');
-  }, 2700);
+  }, 3000);
 </script>
 {% endif %}
 
