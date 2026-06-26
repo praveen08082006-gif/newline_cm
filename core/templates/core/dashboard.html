@@ -306,11 +306,39 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
     },
     plugins: [arcShadow, centerText(centerTitle)]
   });
-  startCountUp(chart, total, 1500);
+  chart.$total = total;
+  chart.reset();          // hold at start until it scrolls into view, then animate
   return chart;
 }
 
-buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12);
-buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11);
+// replay the spin-in + count-up (used on first view and every re-view)
+function replay(chart) {
+  if (chart.$busy) return;
+  chart.$busy = true;
+  chart.reset();
+  chart.update();
+  startCountUp(chart, chart.$total, 1500);
+  setTimeout(() => { chart.$busy = false; }, 1700);
+}
+
+const charts = [
+  buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12),
+  buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11)
+];
+
+// animate each chart every time it scrolls into view
+charts.forEach(function (ch) {
+  const io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) replay(ch);
+    });
+  }, { threshold: 0.35 });
+  io.observe(ch.canvas);
+});
+
+// replay when returning to the page (back/forward / restored from cache)
+window.addEventListener('pageshow', function (e) {
+  if (e.persisted) charts.forEach(replay);
+});
 </script>
 {% endblock %}
