@@ -171,7 +171,7 @@ const arcShadow = {
   afterDatasetsDraw(chart) { chart.ctx.restore(); }
 };
 
-// total count drawn in the doughnut hole
+// total count drawn in the doughnut hole (counts up via chart.$count)
 function centerText(title) {
   return {
     id: 'centerText_' + title,
@@ -179,13 +179,14 @@ function centerText(title) {
       const { ctx, chartArea } = chart;
       if (!chartArea) return;
       const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+      const shown = (chart.$count != null) ? chart.$count : total;
       const cx = (chartArea.left + chartArea.right) / 2;
       const cy = (chartArea.top + chartArea.bottom) / 2;
       ctx.save();
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillStyle = '#1E3A5F';
       ctx.font = "700 30px 'Playfair Display', serif";
-      ctx.fillText(total, cx, cy - 6);
+      ctx.fillText(shown, cx, cy - 6);
       ctx.fillStyle = '#7a879c';
       ctx.font = "600 11px 'Poppins', sans-serif";
       ctx.fillText(title.toUpperCase(), cx, cy + 16);
@@ -194,25 +195,67 @@ function centerText(title) {
   };
 }
 
-// legend: ■ Name - count
-function countLegend(labels, values, colors) {
-  return function () {
-    return labels.map((l, i) => ({ text: l + ' - ' + values[i], fillStyle: colors[i], strokeStyle: colors[i], lineWidth: 0, index: i }));
+// frosted-glass HTML tooltip: dot + name + count + percentage
+function frostedTooltip(baseColors) {
+  return (context) => {
+    const { chart, tooltip } = context;
+    let el = document.getElementById('nl-chart-tip');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'nl-chart-tip'; el.className = 'nl-chart-tip';
+      document.body.appendChild(el);
+    }
+    if (!tooltip || tooltip.opacity === 0) { el.style.opacity = 0; return; }
+    const i = tooltip.dataPoints[0].dataIndex;
+    const data = tooltip.dataPoints[0].dataset.data;
+    const val = data[i];
+    const total = data.reduce((a, b) => a + b, 0);
+    const pct = (val / total * 100).toFixed(1);
+    const name = chart.data.labels[i];
+    const color = baseColors[i] || '#1E4FA3';
+    el.innerHTML = '<span class="nl-tip-dot" style="background:' + color + '"></span>' +
+                   '<span class="nl-tip-name">' + name + '</span>' +
+                   '<div class="nl-tip-sub">Count <b>' + val + '</b> &nbsp;·&nbsp; <b>' + pct + '%</b></div>';
+    const r = chart.canvas.getBoundingClientRect();
+    el.style.opacity = 1;
+    el.style.left = (r.left + tooltip.caretX) + 'px';
+    el.style.top = (r.top + tooltip.caretY) + 'px';
   };
 }
 
-// region: "Name" + "pct%" on each slice
+// legend: ● Name - count, with hover-highlight matching the slice
+function countLegend(labels, values, colors) {
+  return function () {
+    return labels.map((l, i) => ({
+      text: l + ' - ' + values[i], fillStyle: colors[i], strokeStyle: colors[i],
+      lineWidth: 0, pointStyle: 'circle', index: i
+    }));
+  };
+}
+function legendHover(e, item, legend) {
+  const ch = legend.chart;
+  ch.setActiveElements([{ datasetIndex: 0, index: item.index }]);
+  ch.tooltip.setActiveElements([{ datasetIndex: 0, index: item.index }], { x: 0, y: 0 });
+  ch.render();
+}
+function legendLeave(e, item, legend) {
+  const ch = legend.chart;
+  ch.setActiveElements([]);
+  ch.tooltip.setActiveElements([], { x: 0, y: 0 });
+  ch.render();
+}
+
+// labels on slices — Inter 600 white; region = name+pct, product = count on big slices
 const regionLabelsOnSlice = {
-  color: '#fff', font: { weight: '700', size: 11 }, textAlign: 'center',
+  color: '#fff', font: { family: 'Inter', weight: '600', size: 11 }, textAlign: 'center',
   textShadowColor: 'rgba(15,27,60,.55)', textShadowBlur: 6,
   formatter: function (v, ctx) {
     const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
     return [ctx.chart.data.labels[ctx.dataIndex], (v / t * 100).toFixed(1) + '%'];
   }
 };
-// product: count on larger slices only
 const productLabelsOnSlice = {
-  color: '#fff', font: { weight: '700', size: 12 },
+  color: '#fff', font: { family: 'Inter', weight: '600', size: 12 },
   textShadowColor: 'rgba(15,27,60,.55)', textShadowBlur: 6,
   formatter: function (v, ctx) {
     const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -220,46 +263,56 @@ const productLabelsOnSlice = {
   }
 };
 
-const premiumBase = {
-  cutout: '56%',
-  radius: '92%',
-  layout: { padding: 6 },
-  animation: { animateScale: true, animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
-  interaction: { mode: 'nearest' }
-};
+// independent count-up for the centre number (robust, runs alongside the spin-in)
+function startCountUp(chart, total, dur) {
+  chart.$count = 0;
+  const t0 = performance.now();
+  (function loop(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    chart.$count = Math.round(total * (1 - Math.pow(1 - p, 3)));   // easeOutCubic
+    chart.draw();
+    if (p < 1) requestAnimationFrame(loop);
+    else { chart.$count = total; chart.draw(); }
+  })(t0);
+}
 
-new Chart(document.getElementById('regionChart'), {
-  type: 'doughnut',
-  data: { labels: regionLabels, datasets: [{
-    data: regionValues,
-    backgroundColor: gradientFill(regionBg),
-    borderColor: '#fff', borderWidth: 3, borderRadius: 6,
-    hoverOffset: 16, hoverBorderColor: '#fff'
-  }] },
-  options: Object.assign({}, premiumBase, {
-    plugins: {
-      legend: { position: 'right', labels: { boxWidth: 14, padding: 10, font: { size: 12 }, generateLabels: countLegend(regionLabels, regionValues, regionBg) } },
-      datalabels: regionLabelsOnSlice
-    }
-  }),
-  plugins: [arcShadow, centerText('Total')]
-});
+// reusable premium doughnut builder
+function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceLabels, legendPad, legendFont) {
+  const total = values.reduce((a, b) => a + b, 0);
+  const chart = new Chart(document.getElementById(canvasId), {
+    type: 'doughnut',
+    data: { labels: labels, datasets: [{
+      data: values,
+      backgroundColor: gradientFill(baseColors),
+      borderColor: '#fff', borderWidth: 2, borderRadius: 6,
+      hoverOffset: 15, hoverBorderColor: '#fff', hoverBorderWidth: 2
+    }] },
+    options: {
+      cutout: '56%', radius: '92%', layout: { padding: 6 },
+      interaction: { mode: 'nearest', intersect: true },
+      animation: {
+        animateScale: true, animateRotate: true,
+        duration: 1500, easing: 'easeOutCirc',
+        delay: (ctx) => (ctx.type === 'data' && ctx.mode === 'default') ? ctx.dataIndex * 130 : 0
+      },
+      plugins: {
+        legend: {
+          position: 'right',
+          onHover: legendHover, onLeave: legendLeave,
+          labels: { usePointStyle: true, boxWidth: 8, padding: legendPad, font: { family: 'Inter', size: legendFont },
+                    generateLabels: countLegend(labels, values, baseColors) }
+        },
+        tooltip: { enabled: false, external: frostedTooltip(baseColors) },
+        datalabels: sliceLabels
+      }
+    },
+    plugins: [arcShadow, centerText(centerTitle)]
+  });
+  startCountUp(chart, total, 1500);
+  return chart;
+}
 
-new Chart(document.getElementById('productChart'), {
-  type: 'doughnut',
-  data: { labels: productLabels, datasets: [{
-    data: productValues,
-    backgroundColor: gradientFill(productBg),
-    borderColor: '#fff', borderWidth: 3, borderRadius: 6,
-    hoverOffset: 16, hoverBorderColor: '#fff'
-  }] },
-  options: Object.assign({}, premiumBase, {
-    plugins: {
-      legend: { position: 'right', labels: { boxWidth: 14, padding: 8, font: { size: 11 }, generateLabels: countLegend(productLabels, productValues, productBg) } },
-      datalabels: productLabelsOnSlice
-    }
-  }),
-  plugins: [arcShadow, centerText('Products')]
-});
+buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12);
+buildDoughnut('productChart', productLabels, productValues, productBg, 'Products', productLabelsOnSlice, 8, 11);
 </script>
 {% endblock %}

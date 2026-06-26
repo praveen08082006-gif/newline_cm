@@ -4,6 +4,27 @@
    Visual only — functionality untouched.
    ===================================================================== */
 
+/* ---------- Premium chart tooltip (frosted glass) ---------- */
+.nl-chart-tip {
+  position: fixed; z-index: 9000; pointer-events: none; opacity: 0;
+  transform: translate(-50%, -118%); transition: opacity .15s ease;
+  background: rgba(255,255,255,.72);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+          backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.65);
+  box-shadow: 0 14px 34px rgba(15,27,60,.20);
+  border-radius: 12px; padding: 9px 13px;
+  font-family: 'Inter', sans-serif; font-size: .8rem; color: #1E3A5F; white-space: nowrap;
+}
+.nl-chart-tip .nl-tip-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
+.nl-chart-tip .nl-tip-name { font-weight: 600; }
+.nl-chart-tip .nl-tip-sub { margin-top: 3px; font-size: .74rem; color: #5b6b85; }
+.nl-chart-tip .nl-tip-sub b { color: #1E3A5F; font-weight: 700; }
+
+/* chart canvases: gentle fade + scale-in on load */
+#regionChart, #productChart { animation: nlChartIn .7s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes nlChartIn { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+
 /* ---------- Login splash (newline preloader) ---------- */
 #nl-splash {
   position: fixed; inset: 0; z-index: 99999;
