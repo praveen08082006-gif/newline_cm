@@ -127,7 +127,9 @@ Chart.register(ChartDataLabels);
 
 // fixed colours per region (matches reference)
 const regionColors = { 'North India':'#2E7D32', 'West India':'#F4B942', 'East India':'#E87D8F', 'South India':'#42A5F5', 'Unknown':'#90A4AE' };
-const productPalette = ['#1E4FA3','#2E7D32','#F4B942','#E87D8F','#42A5F5','#7b5be0','#0a9396','#c43d3d','#3a7d52','#6b54d3','#1437a8','#9a7a2e'];
+const productPalette = ['#1E4FA3','#2E7D32','#F4B942','#E87D8F','#42A5F5','#7b5be0','#0a9396','#c43d3d',
+                        '#3a7d52','#6b54d3','#1437a8','#9a7a2e','#E07B39','#16A085','#8E44AD','#2C7873',
+                        '#D35400','#5D6D7E','#C0392B','#2980B9','#27AE60','#AF7AC5','#1ABC9C','#E74C3C'];
 
 const regionLabels = {{ region_labels|safe }};
 const regionValues = {{ region_values|safe }};
@@ -313,6 +315,6 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
 }
 
 buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12);
-buildDoughnut('productChart', productLabels, productValues, productBg, 'Products', productLabelsOnSlice, 8, 11);
+buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11);
 </script>
 {% endblock %}
