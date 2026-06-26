@@ -137,6 +137,63 @@ const productLabels = {{ product_labels|safe }};
 const productValues = {{ product_values|safe }};
 const productBg = productLabels.map((l, i) => productPalette[i % productPalette.length]);
 
+// lighten a hex colour toward white (amt 0..1) — used for the glossy gradient top
+function lighten(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  r = Math.round(r + (255 - r) * amt);
+  g = Math.round(g + (255 - g) * amt);
+  b = Math.round(b + (255 - b) * amt);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+// scriptable per-slice vertical gradient (glossy top -> rich base) for a premium sheen
+function gradientFill(baseColors) {
+  return (ctx) => {
+    const base = baseColors[ctx.dataIndex] || '#90A4AE';
+    const chart = ctx.chart, area = chart.chartArea;
+    if (!area) return base;
+    const g = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+    g.addColorStop(0, lighten(base, 0.28));
+    g.addColorStop(1, base);
+    return g;
+  };
+}
+
+// soft drop-shadow under the arcs only (not the labels)
+const arcShadow = {
+  id: 'arcShadow',
+  beforeDatasetsDraw(chart) {
+    const c = chart.ctx; c.save();
+    c.shadowColor = 'rgba(15,27,60,0.28)';
+    c.shadowBlur = 18; c.shadowOffsetX = 0; c.shadowOffsetY = 7;
+  },
+  afterDatasetsDraw(chart) { chart.ctx.restore(); }
+};
+
+// total count drawn in the doughnut hole
+function centerText(title) {
+  return {
+    id: 'centerText_' + title,
+    afterDraw(chart) {
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return;
+      const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top + chartArea.bottom) / 2;
+      ctx.save();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#1E3A5F';
+      ctx.font = "700 30px 'Playfair Display', serif";
+      ctx.fillText(total, cx, cy - 6);
+      ctx.fillStyle = '#7a879c';
+      ctx.font = "600 11px 'Poppins', sans-serif";
+      ctx.fillText(title.toUpperCase(), cx, cy + 16);
+      ctx.restore();
+    }
+  };
+}
+
 // legend: ■ Name - count
 function countLegend(labels, values, colors) {
   return function () {
@@ -163,28 +220,46 @@ const productLabelsOnSlice = {
   }
 };
 
+const premiumBase = {
+  cutout: '56%',
+  radius: '92%',
+  layout: { padding: 6 },
+  animation: { animateScale: true, animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
+  interaction: { mode: 'nearest' }
+};
+
 new Chart(document.getElementById('regionChart'), {
-  type: 'pie',
-  data: { labels: regionLabels, datasets: [{ data: regionValues, backgroundColor: regionBg, borderColor: '#fff', borderWidth: 2 }] },
-  options: {
-    animation: { animateScale: true },
+  type: 'doughnut',
+  data: { labels: regionLabels, datasets: [{
+    data: regionValues,
+    backgroundColor: gradientFill(regionBg),
+    borderColor: '#fff', borderWidth: 3, borderRadius: 6,
+    hoverOffset: 16, hoverBorderColor: '#fff'
+  }] },
+  options: Object.assign({}, premiumBase, {
     plugins: {
       legend: { position: 'right', labels: { boxWidth: 14, padding: 10, font: { size: 12 }, generateLabels: countLegend(regionLabels, regionValues, regionBg) } },
       datalabels: regionLabelsOnSlice
     }
-  }
+  }),
+  plugins: [arcShadow, centerText('Total')]
 });
 
 new Chart(document.getElementById('productChart'), {
-  type: 'pie',
-  data: { labels: productLabels, datasets: [{ data: productValues, backgroundColor: productBg, borderColor: '#fff', borderWidth: 2 }] },
-  options: {
-    animation: { animateScale: true },
+  type: 'doughnut',
+  data: { labels: productLabels, datasets: [{
+    data: productValues,
+    backgroundColor: gradientFill(productBg),
+    borderColor: '#fff', borderWidth: 3, borderRadius: 6,
+    hoverOffset: 16, hoverBorderColor: '#fff'
+  }] },
+  options: Object.assign({}, premiumBase, {
     plugins: {
       legend: { position: 'right', labels: { boxWidth: 14, padding: 8, font: { size: 11 }, generateLabels: countLegend(productLabels, productValues, productBg) } },
       datalabels: productLabelsOnSlice
     }
-  }
+  }),
+  plugins: [arcShadow, centerText('Products')]
 });
 </script>
 {% endblock %}
