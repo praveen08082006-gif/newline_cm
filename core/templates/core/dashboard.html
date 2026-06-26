@@ -67,20 +67,15 @@
   </div>
 </div>
 
-<!-- Charts -->
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-header"><span class="card-title">Region Wise Report</span></div>
-      <div class="card-body"><canvas id="regionChart" height="240"></canvas></div>
-    </div>
-  </div>
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-header"><span class="card-title">Product Wise Report</span></div>
-      <div class="card-body"><canvas id="productChart" height="240"></canvas></div>
-    </div>
-  </div>
+<!-- Charts: each full-width, stacked one per row for more space -->
+<div class="card">
+  <div class="card-header"><span class="card-title">Region Wise Report</span></div>
+  <div class="card-body"><div class="chart-box"><canvas id="regionChart"></canvas></div></div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Product Wise Report</span></div>
+  <div class="card-body"><div class="chart-box"><canvas id="productChart"></canvas></div></div>
 </div>
 
 <!-- Complaint list -->
@@ -290,7 +285,8 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
       hoverOffset: 15, hoverBorderColor: '#fff', hoverBorderWidth: 2
     }] },
     options: {
-      cutout: '56%', radius: '92%', layout: { padding: 6 },
+      maintainAspectRatio: false,
+      cutout: '60%', radius: '94%', layout: { padding: 10 },
       interaction: { mode: 'nearest', intersect: true },
       animation: {
         animateScale: true, animateRotate: true,
