@@ -67,15 +67,20 @@
   </div>
 </div>
 
-<!-- Charts: each full-width, stacked one per row for more space -->
-<div class="card">
-  <div class="card-header"><span class="card-title">Region Wise Report</span></div>
-  <div class="card-body"><div class="chart-box"><canvas id="regionChart"></canvas></div></div>
-</div>
-
-<div class="card">
-  <div class="card-header"><span class="card-title">Product Wise Report</span></div>
-  <div class="card-body"><div class="chart-box"><canvas id="productChart"></canvas></div></div>
+<!-- Charts: side by side -->
+<div class="row">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><span class="card-title">Region Wise Report</span></div>
+      <div class="card-body"><div class="chart-box"><canvas id="regionChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><span class="card-title">Product Wise Report</span></div>
+      <div class="card-body"><div class="chart-box"><canvas id="productChart"></canvas></div></div>
+    </div>
+  </div>
 </div>
 
 <!-- Complaint list -->
@@ -260,11 +265,11 @@ const productLabelsOnSlice = {
   }
 };
 
-// reusable premium doughnut builder
-function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceLabels, legendPad, legendFont) {
+// reusable premium chart builder (full pie when asPie = true, else doughnut with centre total)
+function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceLabels, legendPad, legendFont, asPie) {
   const total = values.reduce((a, b) => a + b, 0);
   const chart = new Chart(document.getElementById(canvasId), {
-    type: 'doughnut',
+    type: asPie ? 'pie' : 'doughnut',
     data: { labels: labels, datasets: [{
       data: values,
       backgroundColor: gradientFill(baseColors),
@@ -273,7 +278,7 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
     }] },
     options: {
       maintainAspectRatio: false,
-      cutout: '60%', radius: '94%', layout: { padding: 10 },
+      cutout: asPie ? 0 : '60%', radius: '94%', layout: { padding: 10 },
       interaction: { mode: 'nearest', intersect: true },
       animation: {
         animateScale: true, animateRotate: true,
@@ -302,16 +307,18 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
         datalabels: sliceLabels
       }
     },
-    plugins: [arcShadow, centerText(centerTitle)]
+    plugins: asPie ? [arcShadow] : [arcShadow, centerText(centerTitle)]
   });
   chart.$total = total;
-  chart.$counting = true;     // count the centre number up during the load animation
-  chart.$animStart = null;
-  chart.$count = 0;
+  if (!asPie) {               // doughnut: count the centre number up during the load animation
+    chart.$counting = true;
+    chart.$animStart = null;
+    chart.$count = 0;
+  }
   return chart;
 }
 
-buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12);
-buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11);
+buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12, true);
+buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11, false);
 </script>
 {% endblock %}

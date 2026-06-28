@@ -21,9 +21,9 @@
 .nl-chart-tip .nl-tip-sub { margin-top: 3px; font-size: .74rem; color: #5b6b85; }
 .nl-chart-tip .nl-tip-sub b { color: #1E3A5F; font-weight: 700; }
 
-/* full-width chart box — gives each chart plenty of room */
-.chart-box { position: relative; height: 420px; }
-@media (max-width: 768px) { .chart-box { height: 340px; } }
+/* chart box height (side-by-side cards) */
+.chart-box { position: relative; height: 320px; }
+@media (max-width: 768px) { .chart-box { height: 300px; } }
 
 /* chart canvases: gentle fade + scale-in on load */
 #regionChart, #productChart { animation: nlChartIn .7s cubic-bezier(.2,.7,.2,1) both; }
