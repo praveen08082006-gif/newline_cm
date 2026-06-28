@@ -260,19 +260,6 @@ const productLabelsOnSlice = {
   }
 };
 
-// independent count-up for the centre number (robust, runs alongside the spin-in)
-function startCountUp(chart, total, dur) {
-  chart.$count = 0;
-  const t0 = performance.now();
-  (function loop(now) {
-    const p = Math.min(1, (now - t0) / dur);
-    chart.$count = Math.round(total * (1 - Math.pow(1 - p, 3)));   // easeOutCubic
-    chart.draw();
-    if (p < 1) requestAnimationFrame(loop);
-    else { chart.$count = total; chart.draw(); }
-  })(t0);
-}
-
 // reusable premium doughnut builder
 function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceLabels, legendPad, legendFont) {
   const total = values.reduce((a, b) => a + b, 0);
@@ -290,8 +277,19 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
       interaction: { mode: 'nearest', intersect: true },
       animation: {
         animateScale: true, animateRotate: true,
-        duration: 1500, easing: 'easeOutCirc',
-        delay: (ctx) => (ctx.type === 'data' && ctx.mode === 'default') ? ctx.dataIndex * 130 : 0
+        duration: 1400, easing: 'easeInOutQuart',
+        delay: (ctx) => (ctx.type === 'data' && ctx.mode === 'default') ? ctx.dataIndex * 60 : 0,
+        onProgress: (a) => {
+          const ch = a.chart; if (!ch.$counting) return;
+          if (ch.$animStart == null) ch.$animStart = performance.now();
+          const p = Math.min(1, (performance.now() - ch.$animStart) / 1400);
+          const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // easeInOutCubic
+          ch.$count = Math.round(ch.$total * e);
+        },
+        onComplete: (a) => {
+          const ch = a.chart; if (!ch.$counting) return;
+          ch.$count = ch.$total; ch.$counting = false; ch.$animStart = null;
+        }
       },
       plugins: {
         legend: {
@@ -307,38 +305,13 @@ function buildDoughnut(canvasId, labels, values, baseColors, centerTitle, sliceL
     plugins: [arcShadow, centerText(centerTitle)]
   });
   chart.$total = total;
-  chart.reset();          // hold at start until it scrolls into view, then animate
+  chart.$counting = true;     // count the centre number up during the load animation
+  chart.$animStart = null;
+  chart.$count = 0;
   return chart;
 }
 
-// replay the spin-in + count-up (used on first view and every re-view)
-function replay(chart) {
-  if (chart.$busy) return;
-  chart.$busy = true;
-  chart.reset();
-  chart.update();
-  startCountUp(chart, chart.$total, 1500);
-  setTimeout(() => { chart.$busy = false; }, 1700);
-}
-
-const charts = [
-  buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12),
-  buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11)
-];
-
-// animate each chart every time it scrolls into view
-charts.forEach(function (ch) {
-  const io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) replay(ch);
-    });
-  }, { threshold: 0.35 });
-  io.observe(ch.canvas);
-});
-
-// replay when returning to the page (back/forward / restored from cache)
-window.addEventListener('pageshow', function (e) {
-  if (e.persisted) charts.forEach(replay);
-});
+buildDoughnut('regionChart', regionLabels, regionValues, regionBg, 'Total', regionLabelsOnSlice, 10, 12);
+buildDoughnut('productChart', productLabels, productValues, productBg, 'Complaints', productLabelsOnSlice, 8, 11);
 </script>
 {% endblock %}
