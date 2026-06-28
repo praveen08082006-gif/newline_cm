@@ -44,10 +44,12 @@ class Command(BaseCommand):
     help = "Add demo complaints across many products (or --clear to remove them)."
 
     def add_arguments(self, parser):
-        parser.add_argument('--count', type=int, default=150,
-                            help='How many demo complaints to create (default 150).')
+        parser.add_argument('--count', type=int, default=70,
+                            help='How many demo complaints to create (default 70).')
         parser.add_argument('--products', type=int, default=16,
                             help='How many distinct products appear in the chart (default 16).')
+        parser.add_argument('--days', type=int, default=18,
+                            help='Spread registration dates over the last N days (default 18).')
         parser.add_argument('--clear', action='store_true',
                             help='Delete demo complaints instead of creating them.')
 
@@ -80,7 +82,7 @@ class Command(BaseCommand):
             product = random.choice(spread)
             region = random.choice(REGIONS)
             status = random.choice(STATUSES)
-            reg = date.today() - timedelta(days=random.randint(0, 150))
+            reg = date.today() - timedelta(days=random.randint(0, opts['days']))
             spoc = None
             if emps_by_region.get(region):
                 spoc = random.choice(emps_by_region[region])
@@ -102,9 +104,11 @@ class Command(BaseCommand):
                 registration_date=reg,
                 created_by=creator,
             )
-            # realistic closed_date for resolved ones (a few days after registration)
+            # realistic closed_date for resolved ones (a few days after registration, never in the future)
             if status in RESOLVED:
-                c.closed_date = reg + timedelta(days=random.randint(1, 12))
+                gap = random.randint(1, 6)
+                closed = reg + timedelta(days=gap)
+                c.closed_date = min(closed, date.today())
             c.save()
             created += 1
 
